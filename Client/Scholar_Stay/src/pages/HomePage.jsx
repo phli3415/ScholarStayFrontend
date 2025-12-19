@@ -3,9 +3,9 @@ import Hero from '../components/Hero';
 
 const HomePage = () => {
   return (
-    <div className="home-page">
+    <div>
       <Hero />
-      {/* You can add other sections like 'Featured Properties' here later */}
+      {/* You can add other sections to your homepage here if needed */}
     </div>
   );
 };
