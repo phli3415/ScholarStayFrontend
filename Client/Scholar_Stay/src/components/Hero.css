@@ -1,0 +1,89 @@
+
+.hero-container {
+  /* Removed background image properties */
+  padding: 6rem 2rem;
+  display: flex;
+  flex-direction: column; /* Stack content vertically */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: #f8f9fa; /* A light, neutral background */
+}
+
+/* The .hero-background class is no longer needed */
+
+.hero-content {
+  max-width: 800px;
+  padding: 2rem;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.hero-content h1 {
+  font-size: 3.2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #8C1D18; /* Dark red, similar to the reference image */
+}
+
+.hero-content p {
+  font-size: 1.15rem;
+  color: #555; /* Dark gray for the paragraph */
+  margin-bottom: 2.5rem; /* More space before the search bar */
+  line-height: 1.6;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff; /* White background for the bar */
+  padding: 0.5rem;
+  border-radius: 50px; /* Fully rounded corners */
+  max-width: 700px;
+  margin: 0 auto;
+  border: 1px solid #ddd; /* Subtle border */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.search-input {
+  flex-grow: 1;
+  border: none;
+  background: transparent;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  outline: none;
+  color: #333;
+}
+
+.filter-button, .search-button {
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: 600;
+}
+
+.filter-button {
+  background-color: #f0f0f0;
+  color: #333;
+  margin-right: 0.5rem;
+}
+
+.filter-button:hover {
+  background-color: #e0e0e0;
+}
+
+.search-button {
+  background-color: #8C1D18; /* Matching dark red */
+  color: white;
+}
+
+.search-button:hover {
+  background-color: #701713; /* A darker shade for hover */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

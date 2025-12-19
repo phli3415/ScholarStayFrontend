@@ -1,10 +1,11 @@
 import React from 'react';
+import Hero from '../components/Hero';
 
 const HomePage = () => {
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <img src="/logo.png" alt="ScholarStay Logo" style={{ width: '200px' }} />
-      <h1>Welcome to ScholarStay</h1>
+    <div className="home-page">
+      <Hero />
+      {/* You can add other sections like 'Featured Properties' here later */}
     </div>
   );
 };
