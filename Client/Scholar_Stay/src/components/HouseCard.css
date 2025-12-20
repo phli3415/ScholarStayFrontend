@@ -1,0 +1,138 @@
+.house-card {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.house-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.house-card-image {
+  position: relative;
+  width: 100%;
+  padding-top: 62.5%; /* 16:10 Aspect Ratio */
+  background-color: #f0f0f0;
+}
+
+.house-card-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.house-status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.house-status.available {
+  background-color: #28a745;
+}
+
+.house-status.rented {
+  background-color: #dc3545;
+}
+
+.house-card-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allows content to fill space */
+}
+
+.house-address {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem;
+}
+
+.house-rent {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #8C1D18; /* Theme color */
+  margin: 0 0 1rem;
+}
+
+.rent-period {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #666;
+}
+
+.house-details-row {
+  display: flex;
+  align-items: center;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.house-distance .fa-university {
+  margin-right: 0.5rem;
+  color: #8C1D18;
+}
+
+.house-facilities {
+  margin-bottom: 1.5rem;
+}
+
+.house-facilities h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: #444;
+}
+
+.house-facilities ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.house-facilities li {
+  background-color: #f0f0f0;
+  padding: 0.3rem 0.7rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+}
+
+.house-card-footer {
+  margin-top: auto; /* Pushes footer to the bottom */
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+  text-align: center;
+}
+
+.details-button {
+  background-color: #8C1D18;
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+  font-weight: 600;
+}
+
+.details-button:hover {
+  background-color: #701713;
+}

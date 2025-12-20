@@ -1,0 +1,164 @@
+/* Modal Overlay: Covers the entire screen */
+.modal-overlay {
+  position: fixed;
+    top: 0;
+      left: 0;
+        right: 0;
+          bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+              display: flex;
+                justify-content: center;
+                  align-items: center;
+                    z-index: 1000;
+                    }
+
+                    /* Modal Content: The main dialog box */
+                    .modal-content {
+                      background-color: #fff;
+                        padding: 1.5rem 2rem 2rem 2rem;
+                          border-radius: 12px;
+                            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+                              width: 90%;
+                                max-width: 500px;
+                                  animation: slide-down 0.3s ease-out;
+                                  }
+
+                                  /* Modal Header: Title and close button */
+                                  .modal-header {
+                                    display: flex;
+                                      justify-content: space-between;
+                                        align-items: center;
+                                          margin-bottom: 1.5rem;
+                                          }
+
+                                          .modal-title {
+                                            font-size: 1.75rem;
+                                              font-weight: 700;
+                                                color: #8C1D18;
+                                                }
+
+                                                .close-icon {
+                                                  background: none;
+                                                    border: none;
+                                                      font-size: 2.5rem;
+                                                        font-weight: 300;
+                                                          color: #888;
+                                                            cursor: pointer;
+                                                              line-height: 1;
+                                                                padding: 0;
+                                                                }
+
+                                                                .close-icon:hover {
+                                                                  color: #333;
+                                                                  }
+
+                                                                  /* General styling for filter groups (text inputs) */
+                                                                  .filter-group {
+                                                                    margin-bottom: 1.25rem;
+                                                                    }
+
+                                                                    .filter-group label {
+                                                                      display: block;
+                                                                        font-weight: 600;
+                                                                          color: #333;
+                                                                            margin-bottom: 0.5rem;
+                                                                            }
+
+                                                                            .filter-group input[type="number"],
+                                                                            .filter-group select {
+                                                                              width: 100%;
+                                                                                padding: 0.75rem;
+                                                                                  border: 1px solid #ccc;
+                                                                                    border-radius: 8px;
+                                                                                      font-size: 1rem;
+                                                                                      }
+
+                                                                                      /* Specific heading for filter categories like 'Amenities' */
+                                                                                      .filter-heading {
+                                                                                        font-size: 1.2rem;
+                                                                                          font-weight: 700;
+                                                                                            color: #333;
+                                                                                              margin-top: 2rem;
+                                                                                                margin-bottom: 1rem;
+                                                                                                  border-bottom: 1px solid #eee;
+                                                                                                    padding-bottom: 0.5rem;
+                                                                                                    }
+
+                                                                                                    /* Styling for checkbox filter groups, to match the image */
+                                                                                                    .filter-group-checkbox {
+                                                                                                      display: flex;
+                                                                                                        align-items: center;
+                                                                                                          margin-bottom: 1rem;
+                                                                                                          }
+
+                                                                                                          .filter-group-checkbox input[type="checkbox"] {
+                                                                                                            /* Custom checkbox appearance */
+                                                                                                              appearance: none;
+                                                                                                                width: 20px;
+                                                                                                                  height: 20px;
+                                                                                                                    border: 2px solid #999;
+                                                                                                                      border-radius: 4px;
+                                                                                                                        cursor: pointer;
+                                                                                                                          margin-right: 12px;
+                                                                                                                            position: relative;
+                                                                                                                              top: -1px; /* Align with text */
+                                                                                                                                flex-shrink: 0;
+                                                                                                                                }
+
+                                                                                                                                .filter-group-checkbox input[type="checkbox"]:checked {
+                                                                                                                                  background-color: #8C1D18;
+                                                                                                                                    border-color: #8C1D18;
+                                                                                                                                    }
+
+                                                                                                                                    /* Checkmark style */
+                                                                                                                                    .filter-group-checkbox input[type="checkbox"]:checked::after {
+                                                                                                                                      content: '\2713'; /* Checkmark character */
+                                                                                                                                        font-size: 14px;
+                                                                                                                                          color: white;
+                                                                                                                                            position: absolute;
+                                                                                                                                              top: 50%;
+                                                                                                                                                left: 50%;
+                                                                                                                                                  transform: translate(-50%, -50%);
+                                                                                                                                                  }
+
+                                                                                                                                                  .filter-group-checkbox label {
+                                                                                                                                                    font-size: 1rem;
+                                                                                                                                                      color: #333;
+                                                                                                                                                        cursor: pointer;
+                                                                                                                                                        }
+
+                                                                                                                                                        /* Modal Actions: Container for the main button */
+                                                                                                                                                        .modal-actions {
+                                                                                                                                                          margin-top: 2.5rem;
+                                                                                                                                                            text-align: right;
+                                                                                                                                                            }
+
+                                                                                                                                                            .apply-button {
+                                                                                                                                                              background-color: #8C1D18;
+                                                                                                                                                                color: white;
+                                                                                                                                                                  border: none;
+                                                                                                                                                                    padding: 0.8rem 1.8rem;
+                                                                                                                                                                      border-radius: 8px;
+                                                                                                                                                                        cursor: pointer;
+                                                                                                                                                                          font-weight: 600;
+                                                                                                                                                                            font-size: 1rem;
+                                                                                                                                                                              transition: background-color 0.3s ease;
+                                                                                                                                                                                width: 100%; /* Make button full-width */
+                                                                                                                                                                                }
+
+                                                                                                                                                                                .apply-button:hover {
+                                                                                                                                                                                  background-color: #701713;
+                                                                                                                                                                                  }
+
+                                                                                                                                                                                  /* Simple animation for the modal appearing */
+                                                                                                                                                                                  @keyframes slide-down {
+                                                                                                                                                                                    from {
+                                                                                                                                                                                        opacity: 0;
+                                                                                                                                                                                            transform: translateY(-30px);
+                                                                                                                                                                                              }
+                                                                                                                                                                                                to {
+                                                                                                                                                                                                    opacity: 1;
+                                                                                                                                                                                                        transform: translateY(0);
+                                                                                                                                                                                                          }
+                                                                                                                                                                                                          }
+                                                                                                                                                                                                          
