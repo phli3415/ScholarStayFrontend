@@ -1,0 +1,173 @@
+/* --- Main Container --- */
+.property-container {
+  background-color: #f7f7f7;
+  min-height: 100vh;
+  padding: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* --- Property Card --- */
+.property-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 900px;
+  padding: 2.5rem 3rem;
+}
+
+/* --- Header: Back & Bookmark --- */
+.property-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.back-button:hover {
+  color: #8C1D18;
+}
+
+.bookmark-button {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bookmark-button:hover {
+  background-color: #f8f8f8;
+  border-color: #b3b3b3;
+}
+
+/* --- Title & Image --- */
+.property-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #8C1D18;
+  margin-bottom: 2rem;
+}
+
+.property-image {
+  width: 100%;
+  height: 450px; /* Fixed height for the image container */
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  background-color: #eee;
+}
+
+.property-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the area, don't stretch */
+}
+
+/* --- Details Grid --- */
+.property-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.property-details-grid div {
+  padding-bottom: 0.5rem;
+}
+
+.property-details-grid strong {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+/* --- Content Sections --- */
+.property-section {
+  margin-bottom: 2.5rem;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #8C1D18;
+  margin-bottom: 1rem;
+}
+
+/* --- Amenities List --- */
+.amenities-list {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.amenities-list li {
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.amenities-list .available {
+  color: #28a745;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.amenities-list .not-available {
+  color: #dc3545;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* --- Description & Contact --- */
+.property-section p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.contact-info {
+  font-style: italic;
+  color: #666;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .property-container {
+    padding: 1rem;
+  }
+  
+  .property-card {
+    padding: 1.5rem;
+  }
+
+  .property-details-grid {
+    grid-template-columns: 1fr; /* Stack grid items on smaller screens */
+    gap: 1rem;
+  }
+
+  .property-title {
+    font-size: 2rem;
+  }
+
+  .property-image {
+    height: 300px; /* Adjust image height for mobile */
+  }
+}
