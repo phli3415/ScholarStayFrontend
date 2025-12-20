@@ -4,7 +4,7 @@ import './Hero.css';
 import FilterModal from './FilterModal';
 
 const Hero = () => {
-  // Unified state for all search and filter parameters
+  // Unified state with null as the default for filters
   const [searchParams, setSearchParams] = useState({
     province: '',
     city: '',
@@ -12,38 +12,36 @@ const Hero = () => {
     min_monthly_rent: '',
     max_monthly_rent: '',
     max_distance_to_university: '',
-    has_kitchen: false,
-    has_washer: false,
-    has_parking: false,
-    is_rented: false,
+    has_kitchen: null, // Default to null (Any)
+    has_washer: null,  // Default to null (Any)
+    has_parking: null, // Default to null (Any)
+    is_rented: null,   // Default to null (Any)
   });
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
 
-  // A single handler for all input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setSearchParams(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSearch = () => {
-    const primarySearchKeys = ['province', 'city', 'street'];
-    const hasPrimarySearch = primarySearchKeys.some(key => !!searchParams[key]);
+    const hasAnyFilter = Object.values(searchParams).some(val => val !== '' && val !== null);
 
-    if (!hasPrimarySearch) {
-      alert('Please enter a Province, City, or Street to begin.');
+    if (!hasAnyFilter) {
+      alert('Please enter a location or apply at least one filter.');
       return;
     }
 
     const queryString = Object.entries(searchParams)
-      .filter(([_, value]) => value) // Filter out empty/false values
+      // Filter out null and empty strings, but keep false values
+      .filter(([_, value]) => value !== '' && value !== null)
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
       .join('&');
 
     navigate(`/search?${queryString}`);
   };
 
-  // This function will be passed to the modal
   const handleApplyFilters = (appliedFilters) => {
     setSearchParams(prev => ({ ...prev, ...appliedFilters }));
     setShowFilters(false);

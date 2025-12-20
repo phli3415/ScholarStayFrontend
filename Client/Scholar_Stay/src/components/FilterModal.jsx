@@ -5,63 +5,103 @@ const FilterModal = ({ isOpen, onClose, onApply, currentFilters }) => {
   const [filters, setFilters] = useState(currentFilters);
 
   useEffect(() => {
-    setFilters(currentFilters);
-  }, [currentFilters]);
+    if (isOpen) {
+      setFilters(currentFilters);
+    }
+  }, [isOpen, currentFilters]);
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+
+    if (type === 'checkbox') {
+      // For amenities, checking the box means `true`, unchecking means `null` (any).
+      if (name === 'has_kitchen' || name === 'has_washer' || name === 'has_parking') {
+        setFilters(prev => ({ ...prev, [name]: checked ? true : null }));
+      } 
+      // For availability, checking means we want `is_rented: false`.
+      else if (name === 'is_rented') {
+        setFilters(prev => ({ ...prev, [name]: checked ? false : null }));
+      }
+    } else {
+      // For text inputs like max rent and distance.
+      setFilters(prev => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleApply = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     onApply(filters);
   };
 
+  const renderCheckbox = (name, label) => (
+    <div className="filter-group-checkbox">
+      <input
+        type="checkbox"
+        id={name}
+        name={name}
+        checked={filters[name] === true}
+        onChange={handleChange}
+      />
+      <label htmlFor={name}>{label}</label>
+    </div>
+  );
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Filter Options</h2>
-        
-        <div className="filter-group">
-          <label>Rent (Monthly)</label>
-          <div className="input-row">
-            <input type="number" name="min_rent" placeholder="Min Rent" value={filters.min_rent} onChange={handleChange} className="filter-input" />
-            <input type="number" name="max_rent" placeholder="Max Rent" value={filters.max_rent} onChange={handleChange} className="filter-input" />
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Advanced Filters</h2>
+          <button className="close-icon" onClick={onClose}>&times;</button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="filter-group">
+            <label htmlFor="max_monthly_rent">Max Rent ($)</label>
+            <input
+              type="number"
+              id="max_monthly_rent"
+              name="max_monthly_rent"
+              placeholder="e.g., 1500"
+              value={filters.max_monthly_rent || ''}
+              onChange={handleChange}
+            />
           </div>
-        </div>
 
-        <div className="filter-group">
-          <label htmlFor="max_distance">Max Distance to University (km)</label>
-          <input type="number" id="max_distance" name="max_distance" placeholder="e.g., 2.5" value={filters.max_distance} onChange={handleChange} className="filter-input" />
-        </div>
-
-        <div className="filter-group">
-          <label>Facilities</label>
-          <div className="checkbox-group">
-            <label><input type="checkbox" name="has_kitchen" checked={filters.has_kitchen} onChange={handleChange} /> Kitchen</label>
-            <label><input type="checkbox" name="has_washer" checked={filters.has_washer} onChange={handleChange} /> Washer</label>
-            <label><input type="checkbox" name="has_parking" checked={filters.has_parking} onChange={handleChange} /> Parking</label>
+          <div className="filter-group">
+            <label htmlFor="max_distance_to_university">Max Distance to University (km)</label>
+            <input
+              type="number"
+              id="max_distance_to_university"
+              name="max_distance_to_university"
+              placeholder="e.g., 5"
+              value={filters.max_distance_to_university || ''}
+              onChange={handleChange}
+            />
           </div>
-        </div>
 
-        <div className="filter-group">
-          <label>Status</label>
-          <div className="checkbox-group">
-            <label><input type="checkbox" name="is_rented" checked={filters.is_rented} onChange={handleChange} /> Include Rented</label>
+          <h4 className="filter-heading">Amenities</h4>
+          {renderCheckbox('has_kitchen', 'Kitchen Included')}
+          {renderCheckbox('has_washer', 'In-House Laundry')}
+          {renderCheckbox('has_parking', 'Parking Available')}
+
+          <h4 className="filter-heading">Availability</h4>
+          <div className="filter-group-checkbox">
+            <input
+              type="checkbox"
+              id="is_available_checkbox" // Use a unique id
+              name="is_rented" // This checkbox controls the is_rented parameter
+              checked={filters.is_rented === false} // It's checked if we are filtering for available (is_rented: false)
+              onChange={handleChange}
+            />
+            <label htmlFor="is_available_checkbox">Only show available properties</label>
           </div>
-        </div>
 
-        <div className="modal-actions">
-          <button onClick={onClose} className="btn-secondary">Cancel</button>
-          <button onClick={handleApply} className="btn-primary">Apply Filters</button>
-        </div>
+          <div className="modal-actions">
+            <button type="submit" className="apply-button">Apply Filters</button>
+          </div>
+        </form>
       </div>
     </div>
   );

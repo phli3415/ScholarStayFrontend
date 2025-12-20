@@ -10,6 +10,7 @@
 
 .hero-content {
   max-width: 800px;
+  width: 100%;
   padding: 2rem;
   animation: fadeIn 1s ease-in-out;
 }
@@ -34,9 +35,9 @@
   align-items: center;
   background-color: #ffffff;
   padding: 0.5rem;
-  border-radius: 12px; /* Slightly reduced rounding for a more modern look */
+  border-radius: 12px;
   width: 100%;
-  max-width: 800px; /* Increased max-width */
+  max-width: 800px;
   margin: 0 auto;
   border: 1px solid #ddd;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -44,43 +45,50 @@
 
 /* Container for the multiple input fields */
 .search-inputs-container {
-  flex-grow: 1;
+  flex-grow: 1; /* Allow this container to take up available space */
   display: flex;
   align-items: center;
+  min-width: 0; /* Crucial for preventing overflow in flex containers */
 }
 
 .search-input {
-  flex: 1; /* Allow inputs to grow and fill space */
+  /* Let inputs grow and shrink gracefully, starting from a base width of 0 */
+  flex: 1 1 0;
   border: none;
   background: transparent;
   padding: 0.8rem 1.2rem;
   font-size: 1rem;
   outline: none;
   color: #333;
-  min-width: 0; /* Important for flexbox shrinking */
+  /* Give a minimum width to prevent them from becoming too small */
+  min-width: 80px;
+  width: 0; /* This is overridden by flex, but good practice to set */
 }
 
 /* Vertical line separator */
 .input-separator {
   width: 1px;
-  height: 24px; /* Adjust height as needed */
+  height: 24px;
   background-color: #e0e0e0;
+  flex-shrink: 0; /* Prevent separator from shrinking */
 }
 
-.filter-button, .search-button {
+.filter-button,
+.search-button {
   border: none;
   padding: 0.8rem 1.5rem;
-  border-radius: 8px; /* Consistent rounding */
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   font-weight: 600;
-  white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap; /* Prevent button text from wrapping */
+  flex-shrink: 0; /* Prevent buttons from shrinking */
 }
 
 .filter-button {
   background-color: #ffffff;
   color: #333;
-  margin-left: 0.5rem; /* Space from inputs */
+  margin-left: 0.5rem;
   margin-right: 0.5rem;
   border: 1px solid #ccc;
 }
