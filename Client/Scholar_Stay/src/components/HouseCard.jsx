@@ -1,34 +1,58 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Import Link for client-side routing
 import './HouseCard.css';
 
-// A mapping for boolean values to display friendly text
-const facilityText = {
-  has_kitchen: 'Kitchen',
-  has_washer: 'Washer',
-  has_parking: 'Parking',
+// Function to handle image data conversion
+const getImageUrl = (photo) => {
+    if (!photo) return "https://via.placeholder.com/400x250.png?text=No+Image+Available"; // Return a placeholder if no photo
+    
+    // If it's already a Base64 string, use it directly
+    if (typeof photo === 'string') {
+        if (photo.startsWith('data:')) {
+            return photo;
+        }
+        // Assumes it's a Base64 string without the prefix
+        return `data:image/jpeg;base64,${photo}`;
+    }
+    
+    // If it's a byte array, convert it
+    if (Array.isArray(photo) && photo.length > 0) {
+        try {
+            // Convert byte array to a Base64 string
+            const base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(photo)));
+            return `data:image/jpeg;base64,${base64String}`;
+        } catch (error) {
+            console.error('Error converting byte array to image:', error);
+            return "https://via.placeholder.com/400x250.png?text=Image+Load+Error"; // Return an error placeholder
+        }
+    }
+    
+    // Fallback for unknown formats
+    return "https://via.placeholder.com/400x250.png?text=Unsupported+Format";
 };
 
-const HouseCard = ({ house }) => {
-  // Extracting address details with fallbacks for safety
-  const address = house.address || {};
-  const fullAddress = `${address.street}, ${address.city}, ${address.province}`;
 
-  // Find which facilities are available
-  const availableFacilities = Object.keys(facilityText)
-    .filter(key => house[key])
-    .map(key => facilityText[key]);
+const HouseCard = ({ house }) => {
+  // Combine address parts into a single string
+  const fullAddress = `${house.street}, ${house.city}`;
+
+  // Determine the display text for the button
+  const statusText = house.is_rented ? 'Rented' : 'Available';
+
+  // Get the correct image URL
+  const imageUrl = getImageUrl(house.image);
 
   return (
     <div className="house-card">
       <div className="house-card-image">
-        {/* Placeholder for an image. You can replace this with a real image if available in your data. */}
-        <img src="https://via.placeholder.com/400x250.png?text=Home+Image" alt={`View of ${fullAddress}`} />
+        {/* Use the getImageUrl function to process the image data */}
+        <img src={imageUrl} alt={`View of ${fullAddress}`} />
         <div className={`house-status ${house.is_rented ? 'rented' : 'available'}`}>
-          {house.is_rented ? 'Rented' : 'Available'}
+          {statusText}
         </div>
       </div>
       <div className="house-card-content">
-        <h3 className="house-address">{fullAddress}</h3>
+        <h3 className="house-address">{fullAddress}, {house.province}</h3>
         
         <p className="house-rent">
           ${house.monthly_rent} <span className="rent-period">/ month</span>
@@ -36,23 +60,27 @@ const HouseCard = ({ house }) => {
         
         <div className="house-details-row">
           <span className="house-distance">
-            <i className="fas fa-university"></i> {house.distance_to_university_km} km to University
+            {/* Assuming Font Awesome is available for the icon */}
+            <i className="fas fa-university"></i> {house.distance_to_university} to University
           </span>
         </div>
 
-        {availableFacilities.length > 0 && (
+        {house.facilities && house.facilities.length > 0 && (
           <div className="house-facilities">
             <h4>Facilities</h4>
             <ul>
-              {availableFacilities.map(facility => (
+              {house.facilities.map(facility => (
                 <li key={facility}>{facility}</li>
-              ))}
+              ))}\
             </ul>
           </div>
         )}
 
         <div className="house-card-footer">
-          <a href={`/house/${house.id}`} className="details-button">More Details</a>
+          {/* Correct the link to point to the /property/:id route */}
+          <Link to={`/property/${house.id}`} className="details-button">
+            More Details
+          </Link>
         </div>
       </div>
     </div>

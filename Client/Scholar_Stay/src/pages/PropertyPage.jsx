@@ -1,41 +1,74 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './PropertyPage.css';
 
-// MOCK DATA - In a real app, you would fetch this based on the `id` param
-const mockHouses = [
-  {
-    id: 1,
-    street: '123 University Ave',
-    city: 'Amherst',
-    province: 'Massachusetts',
-    house_number: '101',
-    monthly_rent: 1250.00,
-    distance_to_university: 1.2, // Assuming km, will convert to miles
-    has_kitchen: true,
-    has_washer: true,
-    has_parking: false,
-    description: 'A cozy 3-bedroom near campus, perfect for students.',
-    image: 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    // The model doesn't have a 'rooms' field, so we'll add it here for the UI
-    rooms: 3 
-  },
-  // ... other mock houses if needed
-];
+// Function to handle image data conversion
+const getImageUrl = (photo) => {
+    if (!photo) return "https://via.placeholder.com/1260x750.png?text=No+Image+Available";
+
+    if (typeof photo === 'string') {
+        return photo.startsWith('data:') ? photo : `data:image/jpeg;base64,${photo}`;
+    }
+
+    if (Array.isArray(photo) && photo.length > 0) {
+        try {
+            const base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(photo)));
+            return `data:image/jpeg;base64,${base64String}`;
+        } catch (error) {
+            console.error('Error converting byte array to image:', error);
+            return "https://via.placeholder.com/1260x750.png?text=Image+Load+Error";
+        }
+    }
+    
+    return "https://via.placeholder.com/1260x750.png?text=Unsupported+Format";
+};
 
 const PropertyPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [house, setHouse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Find the specific house from our mock data
-  const house = mockHouses.find(h => h.id === parseInt(id));
+  useEffect(() => {
+    const fetchHouseDetails = async () => {
+      setLoading(true);
+      try {
+        // Fetching data from your live backend
+        const API_URL = `http://127.0.0.1:8000/api/v1/houses/${id}`;
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.detail || `Failed to fetch property: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setHouse(data);
+      } catch (err) {
+        console.error("Error fetching house details:", err);
+        setError(err.message || 'Could not load property details. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHouseDetails();
+  }, [id]);
+
+  if (loading) {
+    return <div className="property-container status-message"><h2>Loading Property...</h2></div>;
+  }
+
+  if (error) {
+    return <div className="property-container status-message error-message"><h2>Error: {error}</h2></div>;
+  }
 
   if (!house) {
     return <div className="property-container"><h2>Property not found.</h2></div>;
   }
 
-  // Helper to convert km to miles
-  const kmToMiles = (km) => (km * 0.621371).toFixed(1);
+  const imageUrl = getImageUrl(house.image);
 
   return (
     <div className="property-container">
@@ -50,14 +83,14 @@ const PropertyPage = () => {
         <h1 className="property-title">{house.street}, {house.city}</h1>
 
         <div className="property-image">
-          <img src={house.image} alt={`View of ${house.street}`} />
+          <img src={imageUrl} alt={`View of ${house.street}`} />
         </div>
 
         <div className="property-details-grid">
           <div><strong>Apartment No:</strong> {house.house_number}</div>
-          <div><strong>Rooms:</strong> {house.rooms}</div>
+          <div><strong>Landlord's Phone:</strong> {house.landlord_phone_number || 'N/A'}</div>
           <div><strong>Rent per Month:</strong> ${house.monthly_rent.toFixed(2)}</div>
-          <div><strong>Distance from Campus:</strong> {kmToMiles(house.distance_to_university)} miles</div>
+          <div><strong>Distance from Campus:</strong> {house.distance_to_university} km</div>
           <div><strong>Province:</strong> {house.province}</div>
           <div><strong>City:</strong> {house.city}</div>
         </div>
@@ -80,7 +113,7 @@ const PropertyPage = () => {
             <li>
               Parking: 
               <span className={house.has_parking ? 'available' : 'not-available'}>
-                {house.has_parking ? 'Not Available' : 'Available'}
+                {house.has_parking ? 'Available' : 'Not Available'}
               </span>
             </li>
           </ul>
@@ -89,11 +122,6 @@ const PropertyPage = () => {
         <div className="property-section">
           <h2 className="section-title">Description</h2>
           <p>{house.description}</p>
-        </div>
-
-        <div className="property-section">
-          <h2 className="section-title">To Contact if Interested</h2>
-          <p className="contact-info">Contact information will be provided by the owner.</p>
         </div>
 
       </div>
