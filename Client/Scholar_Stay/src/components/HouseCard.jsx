@@ -4,31 +4,26 @@ import './HouseCard.css';
 
 // Function to handle image data conversion
 const getImageUrl = (photo) => {
-    if (!photo) return "https://via.placeholder.com/400x250.png?text=No+Image+Available"; // Return a placeholder if no photo
+    if (!photo) return null;
     
-    // If it's already a Base64 string, use it directly
     if (typeof photo === 'string') {
         if (photo.startsWith('data:')) {
             return photo;
         }
-        // Assumes it's a Base64 string without the prefix
         return `data:image/jpeg;base64,${photo}`;
     }
     
-    // If it's a byte array, convert it
     if (Array.isArray(photo) && photo.length > 0) {
         try {
-            // Convert byte array to a Base64 string
-            const base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(photo)));
+            const base64String = btoa(String.fromCharCode(...photo));
             return `data:image/jpeg;base64,${base64String}`;
         } catch (error) {
             console.error('Error converting byte array to image:', error);
-            return "https://via.placeholder.com/400x250.png?text=Image+Load+Error"; // Return an error placeholder
+            return null;
         }
     }
     
-    // Fallback for unknown formats
-    return "https://via.placeholder.com/400x250.png?text=Unsupported+Format";
+    return null;
 };
 
 
@@ -40,7 +35,7 @@ const HouseCard = ({ house }) => {
   const statusText = house.is_rented ? 'Rented' : 'Available';
 
   // Get the correct image URL
-  const imageUrl = getImageUrl(house.image);
+  const imageUrl = getImageUrl(house.image_data);
 
   return (
     <div className="house-card">

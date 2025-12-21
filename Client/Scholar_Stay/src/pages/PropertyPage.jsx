@@ -4,23 +4,26 @@ import './PropertyPage.css';
 
 // Function to handle image data conversion
 const getImageUrl = (photo) => {
-    if (!photo) return "https://via.placeholder.com/1260x750.png?text=No+Image+Available";
-
+    if (!photo) return null;
+    
     if (typeof photo === 'string') {
-        return photo.startsWith('data:') ? photo : `data:image/jpeg;base64,${photo}`;
+        if (photo.startsWith('data:')) {
+            return photo;
+        }
+        return `data:image/jpeg;base64,${photo}`;
     }
-
+    
     if (Array.isArray(photo) && photo.length > 0) {
         try {
-            const base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(photo)));
+            const base64String = btoa(String.fromCharCode(...photo));
             return `data:image/jpeg;base64,${base64String}`;
         } catch (error) {
             console.error('Error converting byte array to image:', error);
-            return "https://via.placeholder.com/1260x750.png?text=Image+Load+Error";
+            return null;
         }
     }
     
-    return "https://via.placeholder.com/1260x750.png?text=Unsupported+Format";
+    return null;
 };
 
 const PropertyPage = () => {
@@ -68,7 +71,7 @@ const PropertyPage = () => {
     return <div className="property-container"><h2>Property not found.</h2></div>;
   }
 
-  const imageUrl = getImageUrl(house.image);
+  const imageUrl = getImageUrl(house.image_data);
 
   return (
     <div className="property-container">
