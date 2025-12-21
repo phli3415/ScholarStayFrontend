@@ -18,7 +18,7 @@ const SearchPage = () => {
         const queryString = location.search;
         
         // The backend endpoint. Make sure the port matches your backend server.
-        const API_URL = `http://localhost:9192/api/v1/houses/filter/list${queryString}`;
+        const API_URL = `http://localhost:8000/api/v1/houses/filter/list${queryString}`;
 
         const response = await fetch(API_URL);
 
@@ -51,7 +51,7 @@ const SearchPage = () => {
         <div className="status-message error-message">
             Could not load listings. <br />
             Error: {error} <br />
-            Please make sure the backend server is running on port 9192.
+            Please make sure the backend server is running on port 8000.
         </div>
     );
   }

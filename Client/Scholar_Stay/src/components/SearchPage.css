@@ -4,10 +4,12 @@
   margin: 0 auto;
 }
 
-.search-page-container h2 {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 2rem;
+/* Style for the main "Find Your Next Stay" title on the search page */
+.main-title {
+  font-size: 3.2rem; /* Matching Hero h1 */
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #8C1D18; /* Matching Hero h1 color */
   text-align: center;
 }
 
@@ -15,6 +17,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
+  margin-top: 3rem; /* Add space below the search bar */
 }
 
 .status-message {
