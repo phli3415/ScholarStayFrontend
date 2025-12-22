@@ -1,0 +1,66 @@
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 0;
+  margin-top: 2rem; /* Space above the pagination bar */
+}
+
+.pagination-list {
+  display: flex;
+  align-items: center;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.5rem; /* Space between items */
+}
+
+.pagination-item {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; /* Makes the items circular */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pagination-item span {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #555; /* Default color for numbers */
+}
+
+.pagination-item:hover:not(.active):not(.ellipsis) {
+  background-color: #f0f0f0; /* Light grey background on hover */
+}
+
+/* The currently active page */
+.pagination-item.active {
+  background-color: #333; /* Dark background for the active page */
+}
+
+.pagination-item.active span {
+  color: #fff; /* White number for the active page */
+  font-weight: 700;
+}
+
+/* The ellipsis item */
+.pagination-item.ellipsis {
+  cursor: default;
+}
+
+.pagination-item.ellipsis span {
+  color: #aaa;
+}
+
+/* The arrow for next/prev */
+.pagination-item.arrow span {
+  font-size: 1.5rem;
+  color: #777;
+}
+
+.pagination-item.arrow:hover span {
+    color: #333;
+}

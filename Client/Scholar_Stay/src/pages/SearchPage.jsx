@@ -1,23 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../components/SearchPage.css';
 import HouseCard from '../components/HouseCard';
-import SearchBar from '../components/SearchBar'; // Import the new SearchBar component
+import SearchBar from '../components/SearchBar';
+import Pagination from '../components/Pagination';
+
+const PAGE_SIZE = 30;
 
 const SearchPage = () => {
   const [houses, setHouses] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Page number is derived from the URL search params.
+  const queryParams = new URLSearchParams(location.search);
+  const currentPage = parseInt(queryParams.get('page') || '1', 10);
 
   useEffect(() => {
-    // This effect will re-run whenever the URL query string changes (i.e., when a new search is performed)
     const fetchHouses = async () => {
       setLoading(true);
       setError('');
       try {
-        const queryString = location.search;
-        const API_URL = `http://127.0.0.1:8000/api/v1/houses/filter/list${queryString}`;
+        const params = new URLSearchParams(location.search);
+        // We ensure limit and offset are set for every request based on the current page.
+        params.set('limit', String(PAGE_SIZE));
+        params.set('offset', String((currentPage - 1) * PAGE_SIZE));
+        
+        const API_URL = `http://127.0.0.1:8000/api/v1/houses/filter/list?${params.toString()}`;
 
         const response = await fetch(API_URL);
 
@@ -27,7 +39,8 @@ const SearchPage = () => {
         }
 
         const data = await response.json();
-        setHouses(data);
+        setHouses(data.houses || []); // Ensure houses is always an array
+        setTotalCount(data.total_count || 0); // Get total count from response
         
       } catch (err) {
         console.error("Error fetching houses:", err);
@@ -38,9 +51,15 @@ const SearchPage = () => {
     };
 
     fetchHouses();
+    // The effect re-runs whenever the search part of the URL changes.
   }, [location.search]);
 
-  // Helper function to render the main content based on state
+  const handlePageChange = (page) => {
+    const params = new URLSearchParams(location.search);
+    params.set('page', String(page));
+    navigate({ search: params.toString() });
+  };
+
   const renderContent = () => {
     if (loading) {
       return <div className="status-message">Loading listings...</div>;
@@ -51,18 +70,26 @@ const SearchPage = () => {
           <div className="status-message error-message">
               Could not load listings. <br />
               Error: {error} <br />
-              Please make sure your backend server is running on port 8000.
+              Please make sure your backend server is running on port 8000 and returns data in the format: `{{'total_count': number, 'houses': [...]}}`
           </div>
       );
     }
 
     if (houses.length > 0) {
       return (
-        <div className="house-listings-grid">
-          {houses.map(house => (
-            <HouseCard key={house.id} house={house} />
-          ))}
-        </div>
+        <>
+          <div className="house-listings-grid">
+            {houses.map(house => (
+              <HouseCard key={house.id} house={house} />
+            ))}
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalCount={totalCount}
+            pageSize={PAGE_SIZE}
+            onPageChange={handlePageChange}
+          />
+        </>
       );
     }
 
@@ -71,11 +98,8 @@ const SearchPage = () => {
 
   return (
     <div className="search-page-container">
-      {/* Add the main title and the reusable SearchBar */}
       <h1 className="main-title">Find Your Next Stay</h1>
       <SearchBar />
-      
-      {/* Render the appropriate content (loading, error, or results) */}
       {renderContent()}
     </div>
   );
