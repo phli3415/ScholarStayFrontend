@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../components/SearchPage.css';
+import './SearchPage.css'; // Corrected import path
 import HouseCard from '../components/HouseCard';
 import SearchBar from '../components/SearchBar';
 import Pagination from '../components/Pagination';
@@ -15,7 +15,6 @@ const SearchPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Page number is derived from the URL search params.
   const queryParams = new URLSearchParams(location.search);
   const currentPage = parseInt(queryParams.get('page') || '1', 10);
 
@@ -25,33 +24,51 @@ const SearchPage = () => {
       setError('');
       try {
         const params = new URLSearchParams(location.search);
-        // We ensure limit and offset are set for every request based on the current page.
         params.set('limit', String(PAGE_SIZE));
         params.set('offset', String((currentPage - 1) * PAGE_SIZE));
         
-        const API_URL = `http://127.0.0.1:8000/api/v1/houses/filter/list?${params.toString()}`;
+        // Create a new URLSearchParams for the count API without limit and offset
+        const countParams = new URLSearchParams(location.search);
+        countParams.delete('limit');
+        countParams.delete('offset');
+        countParams.delete('page');
 
-        const response = await fetch(API_URL);
+        const API_URL = `http://127.0.0.1:8000/api/v1/houses/search/list?${params.toString()}`;
+        const COUNT_API_URL = `http://127.0.0.1:8000/api/v1/houses/search/count?${countParams.toString()}`;
 
+        // Fire both requests in parallel
+        const [response, countResponse] = await Promise.all([
+          fetch(API_URL),
+          fetch(COUNT_API_URL)
+        ]);
+
+        // Handle error from the main listings fetch
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.detail || `Failed to fetch: ${response.statusText}`);
+          throw new Error(errorData?.detail || `Failed to fetch listings: ${response.statusText}`);
+        }
+
+        // Handle error from the count fetch
+        if (!countResponse.ok) {
+          const errorData = await countResponse.json().catch(() => null);
+          throw new Error(errorData?.detail || `Failed to fetch count: ${countResponse.statusText}`);
         }
 
         const data = await response.json();
-        setHouses(data.houses || []); // Ensure houses is always an array
-        setTotalCount(data.total_count || 0); // Get total count from response
-        
+        const countData = await countResponse.json();
+
+        setHouses(data || []); // Ensure houses is always an array
+        setTotalCount(countData.total_count || 0); // Get total count from the count response
+       
       } catch (err) {
         console.error("Error fetching houses:", err);
-        setError(err.message || 'Could not load listings. Please make sure the backend server is running and accessible.');
+        setError(err.message || 'Could not load listings. Please ensure the backend server is running and accessible.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchHouses();
-    // The effect re-runs whenever the search part of the URL changes.
   }, [location.search]);
 
   const handlePageChange = (page) => {
@@ -69,8 +86,7 @@ const SearchPage = () => {
       return (
           <div className="status-message error-message">
               Could not load listings. <br />
-              Error: {error} <br />
-              Please make sure your backend server is running on port 8000 and returns data in the format: `{{'total_count': number, 'houses': [...]}}`
+              Error: {error}
           </div>
       );
     }

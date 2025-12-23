@@ -1,75 +1,70 @@
 import React from 'react';
-import './Pagination.css';
+import './Pagination.css'; 
+import { usePagination, DOTS } from './usePagination';
 
-const Pagination = ({ onPageChange, currentPage, totalCount, pageSize }) => {
-  const totalPages = Math.ceil(totalCount / pageSize);
+const Pagination = (props) => {
+  const { onPageChange, totalCount, siblingCount = 1, currentPage, pageSize } = props;
 
-  // Don't render pagination if there's only one page or no results
-  if (totalPages <= 1) {
+  const paginationRange = usePagination({
+    currentPage,
+    totalCount,
+    siblingCount,
+    pageSize,
+  });
+
+  // If there are less than 2 times in pagination range we shall not render the component
+  if (currentPage === 0 || paginationRange.length < 2) {
     return null;
   }
 
-  // Function to get the range of pages to display
-  const getPageRange = () => {
-    const range = [];
-    // Always show first page
-    if (totalPages > 1) range.push(1);
-
-    // Add ellipsis if needed
-    if (currentPage > 4) {
-      range.push('...');
-    }
-
-    // Add pages around the current page
-    for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-      if (i > 1 && i < totalPages) {
-        range.push(i);
-      }
-    }
-
-    // Add ellipsis if needed
-    if (currentPage < totalPages - 3) {
-      range.push('...');
-    }
-
-    // Always show last page
-    if (totalPages > 1) range.push(totalPages);
-
-    // Remove duplicates that might occur with small number of pages
-    return [...new Set(range)]; 
+  const onNext = () => {
+    onPageChange(currentPage + 1);
   };
 
-  const pageNumbers = getPageRange();
+  const onPrevious = () => {
+    onPageChange(currentPage - 1);
+  };
+
+  let lastPage = paginationRange[paginationRange.length - 1];
 
   return (
-    <nav className="pagination-container">
+    <div className="pagination-container">
       <ul className="pagination-list">
-        {/* Previous Page Button (optional, can be added here) */}
-
-        {pageNumbers.map((number, index) => {
-          if (number === '...') {
-            return <li key={`ellipsis-${index}`} className="pagination-item ellipsis"><span>...</span></li>;
+        {/* Left navigation arrow */}
+        <li
+          className={`pagination-item arrow ${currentPage === 1 ? 'disabled' : ''}`}
+          onClick={currentPage === 1 ? null : onPrevious}
+        >
+          <span>&#x2190;</span>
+        </li>
+        
+        {paginationRange.map((pageNumber, index) => {
+          // If the pageItem is a DOT, render the DOTS unicode character
+          if (pageNumber === DOTS) {
+            return <li key={`dots-${index}`} className="pagination-item dots">&#8230;</li>;
           }
 
+          // Render our Page Pills
           return (
             <li
-              key={number}
-              className={`pagination-item ${currentPage === number ? 'active' : ''}`}
-              onClick={() => onPageChange(number)}
+              key={pageNumber}
+              className={`pagination-item ${pageNumber === currentPage ? 'active' : ''}`}
+              onClick={() => onPageChange(pageNumber)}
             >
-              <span>{number}</span>
+              <span>{pageNumber}</span>
             </li>
           );
         })}
-
-        {/* Next Page Button */}
-        {currentPage < totalPages && (
-            <li className="pagination-item arrow" onClick={() => onPageChange(currentPage + 1)}>
-                <span>&rsaquo;</span>
-            </li>
-        )}
+        
+        {/* Right navigation arrow */}
+        <li
+          className={`pagination-item arrow ${currentPage === lastPage ? 'disabled' : ''}`}
+          onClick={currentPage === lastPage ? null : onNext}
+        >
+          <span>&#x2192;</span>
+        </li>
       </ul>
-    </nav>
+    </div>
   );
 };
 
