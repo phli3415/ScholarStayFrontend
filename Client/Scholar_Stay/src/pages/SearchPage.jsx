@@ -5,7 +5,7 @@ import HouseCard from '../components/HouseCard';
 import SearchBar from '../components/SearchBar';
 import Pagination from '../components/Pagination';
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 1;
 
 const SearchPage = () => {
   const [houses, setHouses] = useState([]);
@@ -56,9 +56,11 @@ const SearchPage = () => {
 
         const data = await response.json();
         const countData = await countResponse.json();
+        console.log("Fetched data:", data);
+        console.log("Fetched count data:", countData);
 
         setHouses(data || []); // Ensure houses is always an array
-        setTotalCount(countData.total_count || 0); // Get total count from the count response
+        setTotalCount(countData || 0); // Get total count from the count response
        
       } catch (err) {
         console.error("Error fetching houses:", err);
