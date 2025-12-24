@@ -5,7 +5,7 @@ import HouseCard from '../components/HouseCard';
 import SearchBar from '../components/SearchBar';
 import Pagination from '../components/Pagination';
 
-const PAGE_SIZE = 1;
+const PAGE_SIZE = 30;
 
 const SearchPage = () => {
   const [houses, setHouses] = useState([]);
