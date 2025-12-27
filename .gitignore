@@ -1,0 +1,16 @@
+# Dependencies
+/node_modules
+
+# Build output
+/dist
+
+# Log files
+*.log
+
+# Environment variables
+# Ignore the .env file located in the client directory
+/Client/Scholar_Stay/.env
+
+# IDE and editor directories
+.vscode/
+.idea/

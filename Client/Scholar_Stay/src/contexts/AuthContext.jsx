@@ -180,7 +180,7 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     logout,
-    resendVerificationEmail,
+    resendVerificationEmail
   };
 
   return (
