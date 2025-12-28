@@ -14,7 +14,7 @@ const LoginPage = () => {
 
   // If user is already logged in, redirect them
   useEffect(() => {
-    if (session.user) {
+    if (session && session.user) {
       navigate('/');
     }
   }, [session, navigate]);
@@ -86,7 +86,7 @@ const LoginPage = () => {
         </form>
         <div className="signup-link">
           <p>
-            Don't have an account? <Link to="/signup">Sign Up</Link>
+            Don't have an account? <Link to="/register">Sign Up</Link>
           </p>
         </div>
       </div>
