@@ -6,14 +6,13 @@ import './LoginPage.css'; // Reusing the same CSS
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   
-  // State for messages and errors
   const [message, setMessage] = useState('');
   const [resendMessage, setResendMessage] = useState('');
   const [localError, setLocalError] = useState('');
 
-  // State for UI control
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [registeredUser, setRegisteredUser] = useState(null);
@@ -21,7 +20,6 @@ const RegisterPage = () => {
   const { signup, resendVerificationForUser, session } = useAuth();
   const navigate = useNavigate();
 
-  // If user is already logged in, redirect them
   useEffect(() => {
     if (session && session.user) {
       navigate('/');
@@ -34,23 +32,33 @@ const RegisterPage = () => {
     setLocalError('');
     setIsSubmitting(true);
 
-    if (!email || !password || !username) {
+    if (!email || !password || !username || !confirmPassword) {
       setLocalError('Please fill in all fields.');
       setIsSubmitting(false);
       return;
+    }
+
+    if (password !== confirmPassword) {
+        setLocalError('Passwords do not match.');
+        setIsSubmitting(false);
+        return;
     }
 
     try {
       const result = await signup(email, password, username);
       if (result.success) {
         setMessage(result.message);
-        setRegisteredUser(result.user); // Save the registered user object
-        // Clear form on success
+        setRegisteredUser(result.user);
         setEmail('');
         setPassword('');
+        setConfirmPassword('');
         setUsername('');
       } else {
-        setLocalError(result.error || 'Failed to create an account. Please try again.');
+        if (result.error && result.error.includes('auth/email-already-in-use')) {
+            setLocalError('This email address is already registered. Please try logging in.');
+        } else {
+            setLocalError(result.error || 'Failed to create an account. Please try again.');
+        }
       }
     } catch (err) {
       setLocalError(err.message || 'An unexpected error occurred.');
@@ -86,19 +94,16 @@ const RegisterPage = () => {
         <h2>Create Your Account</h2>
         <p>Find your new home, faster.</p>
         
-        {/* Main Success Message after registration */}
         {message && !localError && (
             <div className="success-message">
                 <p>{message}</p>
                 <p>If you don\'t see it, please check your spam folder.</p>
-                
-                {/* Resend button and feedback */}
                 <div style={{ marginTop: '1.5rem' }}>
                     <button 
                         onClick={handleResendEmail} 
                         disabled={isResending}
-                        className="login-button" // Reuse login button style
-                        style={{ backgroundColor: '#555', fontSize: '0.9rem'}} // A more subtle style
+                        className="login-button" 
+                        style={{ backgroundColor: '#555', fontSize: '0.9rem'}}
                     >
                         {isResending ? 'Sending...' : 'Resend Verification Email'}
                     </button>
@@ -107,7 +112,6 @@ const RegisterPage = () => {
             </div>
         )}
 
-        {/* Form only shows if no registration has happened yet */}
         {!message && (
           <form onSubmit={handleSubmit} noValidate>
             <div className="input-group">
@@ -141,6 +145,17 @@ const RegisterPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Choose a strong password"
+              />
+            </div>
+             <div className="input-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                placeholder="Re-enter your password"
               />
             </div>
             
