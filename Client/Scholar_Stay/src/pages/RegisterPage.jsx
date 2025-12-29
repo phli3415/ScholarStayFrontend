@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import './LoginPage.css'; // We can reuse the same CSS for a consistent look
+import './LoginPage.css'; // Reusing the same CSS
 
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  
+  // State for messages and errors
   const [message, setMessage] = useState('');
+  const [resendMessage, setResendMessage] = useState('');
   const [localError, setLocalError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { signup, session } = useAuth();
+  // State for UI control
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [registeredUser, setRegisteredUser] = useState(null);
+
+  const { signup, resendVerificationForUser, session } = useAuth();
   const navigate = useNavigate();
 
   // If user is already logged in, redirect them
@@ -37,6 +44,7 @@ const RegisterPage = () => {
       const result = await signup(email, password, username);
       if (result.success) {
         setMessage(result.message);
+        setRegisteredUser(result.user); // Save the registered user object
         // Clear form on success
         setEmail('');
         setPassword('');
@@ -51,16 +59,55 @@ const RegisterPage = () => {
     }
   };
 
+  const handleResendEmail = async () => {
+    if (!registeredUser) {
+        setResendMessage('Could not find user information to resend email.');
+        return;
+    }
+    setIsResending(true);
+    setResendMessage('');
+    try {
+        const result = await resendVerificationForUser(registeredUser);
+        if(result.success) {
+            setResendMessage(result.message);
+        } else {
+            setResendMessage(result.error || 'An error occurred.');
+        }
+    } catch(err) {
+        setResendMessage(err.message || 'An unexpected error occurred.');
+    } finally {
+        setIsResending(false);
+    }
+  }
+
   return (
-    <div className="login-page-container"> {/* Reusing login page styles */}
-      <div className="login-form-card">   {/* Reusing login page styles */}
+    <div className="login-page-container"> 
+      <div className="login-form-card">
         <h2>Create Your Account</h2>
         <p>Find your new home, faster.</p>
         
-        {/* Success Message Display */}
-        {message && <p className="success-message">{message}</p>}
+        {/* Main Success Message after registration */}
+        {message && !localError && (
+            <div className="success-message">
+                <p>{message}</p>
+                <p>If you don\'t see it, please check your spam folder.</p>
+                
+                {/* Resend button and feedback */}
+                <div style={{ marginTop: '1.5rem' }}>
+                    <button 
+                        onClick={handleResendEmail} 
+                        disabled={isResending}
+                        className="login-button" // Reuse login button style
+                        style={{ backgroundColor: '#555', fontSize: '0.9rem'}} // A more subtle style
+                    >
+                        {isResending ? 'Sending...' : 'Resend Verification Email'}
+                    </button>
+                    {resendMessage && <p style={{ marginTop: '1rem', fontSize: '0.9rem' }}>{resendMessage}</p>}
+                </div>
+            </div>
+        )}
 
-        {/* Form only shows if no success message is present */}
+        {/* Form only shows if no registration has happened yet */}
         {!message && (
           <form onSubmit={handleSubmit} noValidate>
             <div className="input-group">

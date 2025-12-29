@@ -51,6 +51,7 @@
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1rem;
+  box-sizing: border-box; /* ADDED: Ensures padding is included in the width */
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -71,6 +72,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
+  box-sizing: border-box; /* ADDED: Ensures padding is included in the width */
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
@@ -94,6 +96,19 @@
   text-align: center;
   font-size: 0.95rem;
 }
+
+/* Success Message for Registration */
+.success-message {
+    color: #2F855A; /* A green color */
+    background-color: #E6FFFA; /* A light green background */
+    border: 1px solid #38A169;
+    border-radius: 5px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
 
 /* Link to signup page */
 .signup-link {

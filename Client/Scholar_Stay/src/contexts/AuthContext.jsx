@@ -34,7 +34,9 @@ export const AuthProvider = ({ children }) => {
   const performBackendHandshake = async (firebaseUser) => {
     try {
       if (!firebaseUser.emailVerified) {
-        throw new Error('Please verify your email before logging in.');
+        setError('Please verify your email before logging in.');
+        await signOut(auth);
+        return null;
       }
 
       const token = await firebaseUser.getIdToken();
@@ -57,28 +59,32 @@ export const AuthProvider = ({ children }) => {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          // Use a default username from the email, or the display name
           body: JSON.stringify({ username: firebaseUser.displayName || firebaseUser.email.split('@')[0] }),
         });
 
         if (!registerResponse.ok) {
+          const errorText = await registerResponse.text();
+          console.error("Backend registration failed:", errorText);
           throw new Error('Failed to register user on the local server.');
         }
         localUser = await registerResponse.json();
       } else {
-        // Other server errors
+        const errorText = await response.text();
+        console.error("Backend user fetch failed:", errorText);
         throw new Error('An error occurred while fetching user profile.');
       }
 
       setSession({ user: localUser, token, firebaseUser });
+      setError(null); // Clear previous errors on success
       return localUser;
 
     } catch (e) {
-      // If any part of the handshake fails, the user session is not valid
+      console.error("Error in performBackendHandshake:", e);
       setSession({ user: null, token: null, firebaseUser: null });
       setError(e.message);
-      // It's often useful to also sign the user out of Firebase if the backend handshake fails
-      await signOut(auth); 
+      if (auth.currentUser) {
+        await signOut(auth); 
+      }
       return null;
     }
   };
@@ -86,11 +92,10 @@ export const AuthProvider = ({ children }) => {
   // Listen for Firebase auth state changes on initial app load
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
       if (firebaseUser) {
-        // User is signed in to Firebase, now check our backend
         await performBackendHandshake(firebaseUser);
       } else {
-        // User is signed out
         setSession({ user: null, token: null, firebaseUser: null });
       }
       setLoading(false);
@@ -105,19 +110,20 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
-      // Update Firebase profile display name
       if (username) {
         await updateProfile(firebaseUser, { displayName: username });
       }
 
-      // Send verification email
       await sendEmailVerification(firebaseUser);
-      
-      // We don't log the user in. We ask them to verify their email first.
       await signOut(auth);
 
-      return { success: true, message: 'Registration successful! Please check your email to verify your account.' };
+      return { 
+        success: true, 
+        message: 'Registration successful! Please check your email to verify your account.', 
+        user: firebaseUser 
+      };
     } catch (e) {
+      console.error("Error in signup:", e);
       setError(e.message);
       return { success: false, error: e.message };
     }
@@ -127,21 +133,18 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // The onAuthStateChanged listener will automatically handle the backend handshake
-      // but we can also trigger it manually for immediate feedback
-      const localUser = await performBackendHandshake(userCredential.user);
-      if (localUser) {
-         return { success: true, user: localUser };
-      }
-      // If handshake fails, the error is already set inside it
-      return { success: false, error: error };
+      // Step 1: Just sign in with Firebase.
+      await signInWithEmailAndPassword(auth, email, password);
+      
+      // Step 2: The onAuthStateChanged listener will automatically fire and
+      // trigger performBackendHandshake. We removed the manual call here to fix the race condition.
+      return { success: true };
 
     } catch (e) {
+      console.error("Error in login:", e);
       setError(e.message);
+      setLoading(false); // Make sure to stop loading on a login failure
       return { success: false, error: e.message };
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -149,28 +152,30 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       await signOut(auth);
-      // The onAuthStateChanged listener will clear the session
       return { success: true };
     } catch (e) {
+      console.error("Error in logout:", e);
       setError(e.message);
       return { success: false, error: e.message };
     }
   };
 
-  const resendVerificationEmail = async () => {
-     setError(null);
-     // We check the raw firebase user from the session state
-     if (session.firebaseUser) {
-        try {
-            await sendEmailVerification(session.firebaseUser);
-            return { success: true, message: 'Verification email sent!' };
-        } catch (e) {
-            setError(e.message);
-            return { success: false, error: e.message };
-        }
-     }
-     setError('No user is currently logged in to resend verification email.');
-     return { success: false, error: 'No user logged in.' };
+  const resendVerificationForUser = async (user) => {
+    setError(null);
+    if (user) {
+      try {
+        await sendEmailVerification(user);
+        return { success: true, message: 'A new verification email has been sent.' };
+      } catch (e) {
+        console.error("Error in resendVerificationForUser:", e);
+        setError(e.message);
+        return { success: false, error: 'Failed to send verification email. Please try again later.' };
+      }
+    }
+    const err = 'No user object provided to resend verification email.';
+    console.error(err);
+    setError(err);
+    return { success: false, error: err };
   };
 
   const value = {
@@ -180,12 +185,12 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     logout,
-    resendVerificationEmail
+    resendVerificationForUser,
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
