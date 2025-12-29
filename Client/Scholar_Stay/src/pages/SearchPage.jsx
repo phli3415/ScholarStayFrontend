@@ -1,37 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import '../components/SearchPage.css';
+import { useLocation, useNavigate } from 'react-router-dom';
+import '../components/SearchPage.css'; // Corrected import path
 import HouseCard from '../components/HouseCard';
-import SearchBar from '../components/SearchBar'; // Import the new SearchBar component
+import SearchBar from '../components/SearchBar';
+import Pagination from '../components/Pagination';
+
+const PAGE_SIZE = 30;
 
 const SearchPage = () => {
   const [houses, setHouses] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const queryParams = new URLSearchParams(location.search);
+  const currentPage = parseInt(queryParams.get('page') || '1', 10);
 
   useEffect(() => {
-    // This effect will re-run whenever the URL query string changes (i.e., when a new search is performed)
     const fetchHouses = async () => {
       setLoading(true);
       setError('');
       try {
-        const queryString = location.search;
-        const API_URL = `http://127.0.0.1:8000/api/v1/houses/filter/list${queryString}`;
+        const params = new URLSearchParams(location.search);
+        params.set('limit', String(PAGE_SIZE));
+        params.set('offset', String((currentPage - 1) * PAGE_SIZE));
+        
+        // Create a new URLSearchParams for the count API without limit and offset
+        const countParams = new URLSearchParams(location.search);
+        countParams.delete('limit');
+        countParams.delete('offset');
+        countParams.delete('page');
 
-        const response = await fetch(API_URL);
+        const API_URL = `http://127.0.0.1:8000/api/v1/houses/filter/list?${params.toString()}`;
+        const COUNT_API_URL = `http://127.0.0.1:8000/api/v1/houses/filter/count?${countParams.toString()}`;
 
+        // Fire both requests in parallel
+        const [response, countResponse] = await Promise.all([
+          fetch(API_URL),
+          fetch(COUNT_API_URL)
+        ]);
+
+        // Handle error from the main listings fetch
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.detail || `Failed to fetch: ${response.statusText}`);
+          throw new Error(errorData?.detail || `Failed to fetch listings: ${response.statusText}`);
+        }
+
+        // Handle error from the count fetch
+        if (!countResponse.ok) {
+          const errorData = await countResponse.json().catch(() => null);
+          throw new Error(errorData?.detail || `Failed to fetch count: ${countResponse.statusText}`);
         }
 
         const data = await response.json();
-        setHouses(data);
-        
+        const countData = await countResponse.json();
+        console.log("Fetched data:", data);
+        console.log("Fetched count data:", countData);
+
+        setHouses(data || []); // Ensure houses is always an array
+        setTotalCount(countData || 0); // Get total count from the count response
+       
       } catch (err) {
         console.error("Error fetching houses:", err);
-        setError(err.message || 'Could not load listings. Please make sure the backend server is running and accessible.');
+        setError(err.message || 'Could not load listings. Please ensure the backend server is running and accessible.');
       } finally {
         setLoading(false);
       }
@@ -40,7 +73,12 @@ const SearchPage = () => {
     fetchHouses();
   }, [location.search]);
 
-  // Helper function to render the main content based on state
+  const handlePageChange = (page) => {
+    const params = new URLSearchParams(location.search);
+    params.set('page', String(page));
+    navigate({ search: params.toString() });
+  };
+
   const renderContent = () => {
     if (loading) {
       return <div className="status-message">Loading listings...</div>;
@@ -50,19 +88,26 @@ const SearchPage = () => {
       return (
           <div className="status-message error-message">
               Could not load listings. <br />
-              Error: {error} <br />
-              Please make sure your backend server is running on port 8000.
+              Error: {error}
           </div>
       );
     }
 
     if (houses.length > 0) {
       return (
-        <div className="house-listings-grid">
-          {houses.map(house => (
-            <HouseCard key={house.id} house={house} />
-          ))}
-        </div>
+        <>
+          <div className="house-listings-grid">
+            {houses.map(house => (
+              <HouseCard key={house.id} house={house} />
+            ))}
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalCount={totalCount}
+            pageSize={PAGE_SIZE}
+            onPageChange={handlePageChange}
+          />
+        </>
       );
     }
 
@@ -71,11 +116,8 @@ const SearchPage = () => {
 
   return (
     <div className="search-page-container">
-      {/* Add the main title and the reusable SearchBar */}
       <h1 className="main-title">Find Your Next Stay</h1>
       <SearchBar />
-      
-      {/* Render the appropriate content (loading, error, or results) */}
       {renderContent()}
     </div>
   );

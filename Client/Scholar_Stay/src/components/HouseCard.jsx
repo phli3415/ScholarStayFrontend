@@ -56,7 +56,7 @@ const HouseCard = ({ house }) => {
         <div className="house-details-row">
           <span className="house-distance">
             {/* Assuming Font Awesome is available for the icon */}
-            <i className="fas fa-university"></i> {house.distance_to_university} to University
+            <i className="fas fa-university"></i> {house.distance_to_university} km to University
           </span>
         </div>
 
