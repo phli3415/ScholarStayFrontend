@@ -58,6 +58,8 @@ const LoginPage = () => {
             setLocalError('No account found with this email. Please sign up.');
           } else if (result.error.includes('auth/invalid-email')) {
             setLocalError('The email address is not valid.');
+          } else if (result.error.includes('Please verify your email before logging in.')) {
+            setLocalError('Please verify your email before logging in.');
           }
           else {
             setLocalError('Failed to log in. Please check your credentials.');
