@@ -46,6 +46,7 @@ const LoginPage = () => {
 
     try {
       const result = await login(email, password);
+      
       if (result.success) {
         navigate('/'); // Redirect on successful login
       } else {
@@ -55,7 +56,10 @@ const LoginPage = () => {
             setLocalError('Incorrect password or email. Please try again.');
           } else if (result.error.includes('auth/user-not-found')) {
             setLocalError('No account found with this email. Please sign up.');
-          } else {
+          } else if (result.error.includes('auth/invalid-email')) {
+            setLocalError('The email address is not valid.');
+          }
+          else {
             setLocalError('Failed to log in. Please check your credentials.');
           }
         } else {
