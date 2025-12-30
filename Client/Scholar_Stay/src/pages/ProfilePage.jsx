@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import './ProfilePage.css'; // Import the stylesheet
+import './ProfilePage.css'; // Make sure the new CSS is imported
+
+// Simple icons - you can replace these with an icon library like react-icons
+const BookmarkIcon = () => <span>&#x1F516;</span>; // Bookmark emoji
+const AddIcon = () => <span>&#x2795;</span>; // Plus emoji
+const LogoutIcon = () => <span>&#x21AA;</span>; // Arrow emoji
 
 const ProfilePage = () => {
-  const { session, logout, resendVerificationForUser } = useAuth();
+  const { session, logout } = useAuth();
   const navigate = useNavigate();
-  const [resendMessage, setResendMessage] = useState('');
-  const [isResending, setIsResending] = useState(false);
 
   // Redirect to login page if user is not authenticated
   useEffect(() => {
+    // We add a check for loading state from the context if it exists
+    // For now, we rely on session being populated.
     if (!session || !session.user) {
       navigate('/login');
     }
@@ -19,68 +24,51 @@ const ProfilePage = () => {
   const handleLogout = async () => {
     const { success } = await logout();
     if (success) {
-      navigate('/login');
+      navigate('/login'); // Redirect to login after successful logout
     }
+    // If logout fails, an error will be set in the context, which you can display if needed
   };
-  
-  const handleResendVerification = async () => {
-      if (!session.firebaseUser) return;
-      setIsResending(true);
-      setResendMessage('');
-      const result = await resendVerificationForUser(session.firebaseUser);
-      if(result.success) {
-        setResendMessage(result.message);
-      } else {
-        setResendMessage(result.error || 'An error occurred.');
-      }
-      setIsResending(false);
-  }
 
-  // Render a loading state or nothing while session is being checked
-  if (!session || !session.user) {
+  // While session is loading or if user is not logged in, render nothing.
+  // The useEffect will handle the redirect.
+  if (!session || !session.user || !session.firebaseUser) {
     return null;
   }
 
-  const { user, firebaseUser } = session;
+  const userInitial = session.user.username ? session.user.username.charAt(0).toUpperCase() : '?';
 
   return (
-    <div className="profile-page-container">
-      <h1>Your Profile</h1>
-
-      <div className="profile-card">
-        <h2>Account Details</h2>
-        <p><strong>Username:</strong> {user.username}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>UID:</strong> {firebaseUser.uid}</p>
-        <p><strong>Email Verification:</strong> 
-            {firebaseUser.emailVerified ? 
-                <span className='verified'>Verified</span> : 
-                <span className='not-verified'>Not Verified</span>
-            }
-            {!firebaseUser.emailVerified && (
-                <>
-                    <button 
-                        className="resend-button" 
-                        onClick={handleResendVerification}
-                        disabled={isResending}
-                    >
-                        {isResending ? 'Sending...' : 'Resend Verification Email'}
-                    </button>
-                </>
-            )}
-        </p>
-        {resendMessage && <p className="resend-message">{resendMessage}</p>}
-      </div>
-
-      <div className="profile-card">
-          <h2>Quick Actions</h2>
-          <div className="quick-actions-buttons">
-            <button className="action-button" onClick={() => navigate('/bookmarks')}>View Bookmarks</button>
-            <button className="action-button" onClick={() => navigate('/add-listing')}>Add a Listing</button>
-            <button className="action-button logout-button" onClick={handleLogout}>Log Out</button>
+    <div className="profile-page-background">
+      <div className="profile-menu-container">
+        {/* Profile Header */}
+        <div className="profile-header">
+          <div className="profile-picture">
+            {userInitial}
           </div>
-      </div>
+          <div className="profile-info">
+            <p className="username">{session.user.username}</p>
+            <p className="email">{session.firebaseUser.email}</p>
+          </div>
+        </div>
 
+        <hr className="divider" />
+
+        {/* Profile Actions */}
+        <ul className="profile-menu-actions">
+          <li onClick={() => navigate('/bookmarks')}>
+            <span className="icon"><BookmarkIcon /></span>
+            View Bookmarks
+          </li>
+          <li onClick={() => navigate('/add-house')}>
+            <span className="icon"><AddIcon /></span>
+            Add New House
+          </li>
+          <li onClick={handleLogout}>
+            <span className="icon"><LogoutIcon /></span>
+            Log Out
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };

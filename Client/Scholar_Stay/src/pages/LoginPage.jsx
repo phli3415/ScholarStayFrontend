@@ -12,7 +12,6 @@ const LoginPage = () => {
   const { login, session, error: authError } = useAuth();
   const navigate = useNavigate();
 
-  // If user is already logged in, redirect them
   useEffect(() => {
     if (session && session.user) {
       navigate('/');
@@ -33,13 +32,29 @@ const LoginPage = () => {
     try {
       const result = await login(email, password);
       if (result.success) {
-        navigate('/'); // Redirect to homepage on successful login
+        navigate('/'); 
       } else {
-        // Use the specific error from the login function result
-        setLocalError(result.error || 'Failed to log in. Please check your credentials.');
+        let errorMessage = 'Failed to log in. Please try again.';
+        if (result.error) {
+            switch (result.error) {
+                case 'auth/user-not-found':
+                case 'auth/invalid-email':
+                    errorMessage = 'No account found with this email. Please sign up or try again.';
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = 'Incorrect password. Please try again.';
+                    break;
+                case 'auth/network-request-failed':
+                    errorMessage = 'Cannot connect to the network. Please check your internet connection.';
+                    break;
+                default:
+                    errorMessage = result.error; 
+                    break;
+            }
+        }
+        setLocalError(errorMessage);
       }
     } catch (err) {
-      // Fallback for unexpected errors during the process
       setLocalError(err.message || 'An unexpected error occurred.');
     } finally {
       setIsSubmitting(false);
@@ -75,7 +90,6 @@ const LoginPage = () => {
             />
           </div>
           
-          {/* Display the most specific error message available */}
           {(localError || authError) && (
             <p className="error-message">{localError || authError}</p>
           )}
