@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import ChatPage from './pages/ChatPage';
+import AddHousePage from './pages/AddHousePage';
 import HouseCardTest from './components/HouseCardTest';
 import './App.css';
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/add-house" element={<AddHousePage />} />
 
           {/* Dedicated Test Route */}
           <Route path="/testhousecard" element={<HouseCardTest />} />

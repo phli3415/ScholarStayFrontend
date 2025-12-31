@@ -33,6 +33,8 @@ export const AuthProvider = ({ children }) => {
   // This function performs the "handshake" with your backend
   const performBackendHandshake = async (firebaseUser) => {
     try {
+      await firebaseUser.reload();
+      // console.log("Firebase user reloaded:", firebaseUser);
       if (!firebaseUser.emailVerified) {
         setError('Please verify your email before logging in.');
         await signOut(auth);
