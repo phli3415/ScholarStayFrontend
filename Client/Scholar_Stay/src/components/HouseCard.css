@@ -139,10 +139,12 @@
   margin-top: auto; 
   padding-top: 1rem;
   border-top: 1px solid #f0f0f0;
-  text-align: center;
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
 }
 
-.details-button {
+.details-button, .bookmark-button {
   background-color: #8C1D18;
   color: white;
   text-decoration: none;
@@ -151,8 +153,10 @@
   display: inline-block;
   transition: background-color 0.3s ease;
   font-weight: 600;
+  border: none;
+  cursor: pointer;
 }
 
-.details-button:hover {
+.details-button:hover, .bookmark-button:hover {
   background-color: #701713;
 }

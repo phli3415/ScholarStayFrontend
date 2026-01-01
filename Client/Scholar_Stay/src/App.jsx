@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext'; // Import the AuthProvider
 import Navbar from './components/Navbar';
@@ -9,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import ChatPage from './pages/ChatPage';
 import AddHousePage from './pages/AddHousePage';
+import BookmarkPage from './pages/BookmarkPage';
 import HouseCardTest from './components/HouseCardTest';
 import './App.css';
 
@@ -27,6 +29,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/add-house" element={<AddHousePage />} />
+          <Route path="/bookmarks" element={<BookmarkPage />} />
 
           {/* Dedicated Test Route */}
           <Route path="/testhousecard" element={<HouseCardTest />} />
