@@ -1,18 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './PropertyPage.css';
 
-// Function to handle image data conversion
+const base_url = "http://127.0.0.1:8000/api/v1/";
+
 const getImageUrl = (photo) => {
     if (!photo) return null;
-    
     if (typeof photo === 'string') {
-        if (photo.startsWith('data:')) {
-            return photo;
-        }
+        if (photo.startsWith('data:')) return photo;
         return `data:image/jpeg;base64,${photo}`;
     }
-    
     if (Array.isArray(photo) && photo.length > 0) {
         try {
             const base64String = btoa(String.fromCharCode(...photo));
@@ -22,35 +21,32 @@ const getImageUrl = (photo) => {
             return null;
         }
     }
-    
     return null;
 };
 
 const PropertyPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { session } = useAuth();
   const [house, setHouse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
     const fetchHouseDetails = async () => {
       setLoading(true);
       try {
-        // Fetching data from your live backend
-        const API_URL = `http://127.0.0.1:8000/api/v1/houses/${id}`;
-        const response = await fetch(API_URL);
-
+        const response = await fetch(`${base_url}houses/${id}`);
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
           throw new Error(errorData?.detail || `Failed to fetch property: ${response.statusText}`);
         }
-
         const data = await response.json();
         setHouse(data);
       } catch (err) {
         console.error("Error fetching house details:", err);
-        setError(err.message || 'Could not load property details. Please try again later.');
+        setError(err.message || 'Could not load property details.');
       } finally {
         setLoading(false);
       }
@@ -58,6 +54,77 @@ const PropertyPage = () => {
 
     fetchHouseDetails();
   }, [id]);
+
+  useEffect(() => {
+    const checkBookmark = async () => {
+      if (session && house) {
+        try {
+          const response = await fetch(`${base_url}bookmarks/check/${house.id}/`, {
+            headers: {
+              'Authorization': `Bearer ${session.token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setIsBookmarked(data.is_bookmarked);
+          } else {
+            console.error('Failed to check bookmark status');
+          }
+        } catch (error) {
+          console.error('Error checking bookmark status:', error);
+        }
+      }
+    };
+
+    checkBookmark();
+  }, [session, house]);
+
+  const handleBookmark = async () => {
+    if (!session) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${base_url}bookmarks/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`,
+        },
+        body: JSON.stringify({ house_id: house.id }),
+      });
+
+      if (response.ok) {
+        setIsBookmarked(true);
+      } else {
+        console.error('Failed to add bookmark');
+      }
+    } catch (error) {
+      console.error('Error adding bookmark:', error);
+    }
+  };
+
+  const handleRemoveBookmark = async () => {
+    if (!session) return;
+
+    try {
+      const response = await fetch(`${base_url}bookmarks/by-house/${house.id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.token}`,
+        },
+      });
+
+      if (response.ok) {
+        setIsBookmarked(false);
+      } else {
+        console.error('Failed to remove bookmark');
+      }
+    } catch (error) {
+      console.error('Error removing bookmark:', error);
+    }
+  };
 
   if (loading) {
     return <div className="property-container status-message"><h2>Loading Property...</h2></div>;
@@ -80,7 +147,15 @@ const PropertyPage = () => {
           <button onClick={() => navigate(-1)} className="back-button">
             &larr; Back to Search
           </button>
-          <button className="bookmark-button">Log in to Bookmark</button>
+          {session && session.user? (
+            isBookmarked ? (
+              <button onClick={handleRemoveBookmark} className="bookmark-button">Remove Bookmark</button>
+            ) : (
+              <button onClick={handleBookmark} className="bookmark-button">Add Bookmark</button>
+            )
+          ) : (
+            <button onClick={() => navigate('/login')} className="bookmark-button">Login to Add Bookmark</button>
+          )}
         </div>
 
         <h1 className="property-title">{house.street}, {house.city}</h1>

@@ -1,15 +1,18 @@
-
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React from 'react';
+import { Link } from 'react-router-dom'; // Import Link for client-side routing
 import './HouseCard.css';
 
+// Function to handle image data conversion
 const getImageUrl = (photo) => {
     if (!photo) return null;
+    
     if (typeof photo === 'string') {
-        if (photo.startsWith('data:')) return photo;
+        if (photo.startsWith('data:')) {
+            return photo;
+        }
         return `data:image/jpeg;base64,${photo}`;
     }
+    
     if (Array.isArray(photo) && photo.length > 0) {
         try {
             const base64String = btoa(String.fromCharCode(...photo));
@@ -19,92 +22,25 @@ const getImageUrl = (photo) => {
             return null;
         }
     }
+    
     return null;
 };
 
+
 const HouseCard = ({ house }) => {
-  const { session } = useAuth();
-  const navigate = useNavigate();
-  const [isBookmarked, setIsBookmarked] = useState(false);
-
-  useEffect(() => {
-    const checkBookmark = async () => {
-      if (session) {
-        try {
-          const response = await fetch(`http://localhost:8000/bookmarks/check/${house.id}/`, {
-            headers: {
-              'Authorization': `Bearer ${session.access_token}`,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setIsBookmarked(data.is_bookmarked);
-          } else {
-            console.error('Failed to check bookmark status');
-          }
-        } catch (error) {
-          console.error('Error checking bookmark status:', error);
-        }
-      }
-    };
-
-    checkBookmark();
-  }, [session, house.id]);
-
-  const handleBookmark = async () => {
-    if (!session) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:8000/bookmarks/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ house_id: house.id }),
-      });
-
-      if (response.ok) {
-        setIsBookmarked(true);
-      } else {
-        console.error('Failed to add bookmark');
-      }
-    } catch (error) {
-      console.error('Error adding bookmark:', error);
-    }
-  };
-
-  const handleRemoveBookmark = async () => {
-    if (!session) return;
-
-    try {
-      const response = await fetch(`http://localhost:8000/bookmarks/${house.id}/`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (response.ok) {
-        setIsBookmarked(false);
-      } else {
-        console.error('Failed to remove bookmark');
-      }
-    } catch (error) {
-      console.error('Error removing bookmark:', error);
-    }
-  };
-
+  // Combine address parts into a single string
   const fullAddress = `${house.street}, ${house.city}`;
+
+  // Determine the display text for the button
   const statusText = house.is_rented ? 'Rented' : 'Available';
+
+  // Get the correct image URL
   const imageUrl = getImageUrl(house.image_data);
 
   return (
     <div className="house-card">
       <div className="house-card-image">
+        {/* Use the getImageUrl function to process the image data */}
         <img src={imageUrl} alt={`View of ${fullAddress}`} />
         <div className={`house-status ${house.is_rented ? 'rented' : 'available'}`}>
           {statusText}
@@ -112,33 +48,34 @@ const HouseCard = ({ house }) => {
       </div>
       <div className="house-card-content">
         <h3 className="house-address">{fullAddress}, {house.province}</h3>
-        <p className="house-rent">${house.monthly_rent} <span className="rent-period">/ month</span></p>
+        
+        <p className="house-rent">
+          ${house.monthly_rent} <span className="rent-period">/ month</span>
+        </p>
+        
         <div className="house-details-row">
           <span className="house-distance">
+            {/* Assuming Font Awesome is available for the icon */}
             <i className="fas fa-university"></i> {house.distance_to_university} km to University
           </span>
         </div>
+
         {house.facilities && house.facilities.length > 0 && (
           <div className="house-facilities">
             <h4>Facilities</h4>
             <ul>
               {house.facilities.map(facility => (
                 <li key={facility}>{facility}</li>
-              ))}
+              ))}\
             </ul>
           </div>
         )}
+
         <div className="house-card-footer">
-          <Link to={`/property/${house.id}`} className="details-button">More Details</Link>
-          {session ? (
-            isBookmarked ? (
-              <button onClick={handleRemoveBookmark} className="bookmark-button">Remove Bookmark</button>
-            ) : (
-              <button onClick={handleBookmark} className="bookmark-button">Add Bookmark</button>
-            )
-          ) : (
-            <button onClick={() => navigate('/login')} className="bookmark-button">Login to Add Bookmark</button>
-          )}
+          {/* Correct the link to point to the /property/:id route */}
+          <Link to={`/property/${house.id}`} className="details-button">
+            More Details
+          </Link>
         </div>
       </div>
     </div>
