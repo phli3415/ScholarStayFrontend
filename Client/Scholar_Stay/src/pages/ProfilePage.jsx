@@ -1,210 +1,76 @@
-
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import './PropertyPage.css';
+import { useNavigate } from 'react-router-dom';
+import './ProfilePage.css'; // Make sure the new CSS is imported
 
-const base_url = "http://127.0.0.1:8000/api/v1/";
+// Simple icons - you can replace these with an icon library like react-icons
+const BookmarkIcon = () => <span>&#x1F516;</span>; // Bookmark emoji
+const AddIcon = () => <span>&#x2795;</span>; // Plus emoji
+const LogoutIcon = () => <span>&#x21AA;</span>; // Arrow emoji
 
-const getImageUrl = (photo) => {
-    if (!photo) return null;
-    if (typeof photo === 'string') {
-        if (photo.startsWith('data:')) return photo;
-        return `data:image/jpeg;base64,${photo}`;
-    }
-    if (Array.isArray(photo) && photo.length > 0) {
-        try {
-            const base64String = btoa(String.fromCharCode(...photo));
-            return `data:image/jpeg;base64,${base64String}`;
-        } catch (error) {
-            console.error('Error converting byte array to image:', error);
-            return null;
-        }
-    }
-    return null;
-};
-
-const PropertyPage = () => {
-  const { id } = useParams();
+const ProfilePage = () => {
+  const { session, logout } = useAuth();
   const navigate = useNavigate();
-  const { session } = useAuth();
-  const [house, setHouse] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [isBookmarked, setIsBookmarked] = useState(false);
 
+  // Redirect to login page if user is not authenticated
   useEffect(() => {
-    const fetchHouseDetails = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`${base_url}houses/${id}`);
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.detail || `Failed to fetch property: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setHouse(data);
-      } catch (err) {
-        console.error("Error fetching house details:", err);
-        setError(err.message || 'Could not load property details.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHouseDetails();
-  }, [id]);
-
-  useEffect(() => {
-    const checkBookmark = async () => {
-      if (session && house) {
-        try {
-          const response = await fetch(`${base_url}bookmarks/check/${house.id}/`, {
-            headers: {
-              'Authorization': `Bearer ${session.token}`,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setIsBookmarked(data.is_bookmarked);
-          } else {
-            console.error('Failed to check bookmark status');
-          }
-        } catch (error) {
-          console.error('Error checking bookmark status:', error);
-        }
-      }
-    };
-
-    checkBookmark();
-  }, [session, house]);
-
-  const handleBookmark = async () => {
-    if (!session) {
+    // We add a check for loading state from the context if it exists
+    // For now, we rely on session being populated.
+    if (!session || !session.user) {
       navigate('/login');
-      return;
     }
+  }, [session, navigate]);
 
-    try {
-      const response = await fetch(`${base_url}bookmarks/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.token}`,
-        },
-        body: JSON.stringify({ house_id: house.id }),
-      });
-
-      if (response.ok) {
-        setIsBookmarked(true);
-      } else {
-        console.error('Failed to add bookmark');
-      }
-    } catch (error) {
-      console.error('Error adding bookmark:', error);
+  const handleLogout = async () => {
+    const { success } = await logout();
+    if (success) {
+      navigate('/login'); // Redirect to login after successful logout
     }
+    // If logout fails, an error will be set in the context, which you can display if needed
   };
 
-  const handleRemoveBookmark = async () => {
-    if (!session) return;
-
-    try {
-      const response = await fetch(`${base_url}bookmarks/by-house/${house.id}/`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.token}`,
-        },
-      });
-
-      if (response.ok) {
-        setIsBookmarked(false);
-      } else {
-        console.error('Failed to remove bookmark');
-      }
-    } catch (error) {
-      console.error('Error removing bookmark:', error);
-    }
-  };
-
-  if (loading) {
-    return <div className="property-container status-message"><h2>Loading Property...</h2></div>;
+  // While session is loading or if user is not logged in, render nothing.
+  // The useEffect will handle the redirect.
+  if (!session || !session.user || !session.firebaseUser) {
+    return null;
   }
 
-  if (error) {
-    return <div className="property-container status-message error-message"><h2>Error: {error}</h2></div>;
-  }
-
-  if (!house) {
-    return <div className="property-container"><h2>Property not found.</h2></div>;
-  }
-
-  const imageUrl = getImageUrl(house.image_data);
+  const userInitial = session.user.username ? session.user.username.charAt(0).toUpperCase() : '?';
 
   return (
-    <div className="property-container">
-      <div className="property-card">
-        <div className="property-header">
-          <button onClick={() => navigate(-1)} className="back-button">
-            &larr; Back to Search
-          </button>
-          {session && session.user? (
-            isBookmarked ? (
-              <button onClick={handleRemoveBookmark} className="bookmark-button">Remove Bookmark</button>
-            ) : (
-              <button onClick={handleBookmark} className="bookmark-button">Add Bookmark</button>
-            )
-          ) : (
-            <button onClick={() => navigate('/login')} className="bookmark-button">Login to Add Bookmark</button>
-          )}
+    <div className="profile-page-background">
+      <div className="profile-menu-container">
+        {/* Profile Header */}
+        <div className="profile-header">
+          <div className="profile-picture">
+            {userInitial}
+          </div>
+          <div className="profile-info">
+            <p className="username">{session.user.username}</p>
+            <p className="email">{session.firebaseUser.email}</p>
+          </div>
         </div>
 
-        <h1 className="property-title">{house.street}, {house.city}</h1>
+        <hr className="divider" />
 
-        <div className="property-image">
-          <img src={imageUrl} alt={`View of ${house.street}`} />
-        </div>
-
-        <div className="property-details-grid">
-          <div><strong>Apartment No:</strong> {house.house_number}</div>
-          <div><strong>Landlord's Phone:</strong> {house.landlord_phone_number || 'N/A'}</div>
-          <div><strong>Rent per Month:</strong> ${house.monthly_rent.toFixed(2)}</div>
-          <div><strong>Distance from Campus:</strong> {house.distance_to_university} km</div>
-          <div><strong>Province:</strong> {house.province}</div>
-          <div><strong>City:</strong> {house.city}</div>
-        </div>
-
-        <div className="property-section">
-          <h2 className="section-title">Amenities</h2>
-          <ul className="amenities-list">
-            <li>
-              Kitchen: 
-              <span className={house.has_kitchen ? 'available' : 'not-available'}>
-                {house.has_kitchen ? 'Available' : 'Not Available'}
-              </span>
-            </li>
-            <li>
-              Laundry/Drying: 
-              <span className={house.has_washer ? 'available' : 'not-available'}>
-                {house.has_washer ? 'Available' : 'Not Available'}
-              </span>
-            </li>
-            <li>
-              Parking: 
-              <span className={house.has_parking ? 'available' : 'not-available'}>
-                {house.has_parking ? 'Available' : 'Not Available'}
-              </span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="property-section">
-          <h2 classNameS="section-title">Description</h2>
-          <p>{house.description}</p>
-        </div>
-
+        {/* Profile Actions */}
+        <ul className="profile-menu-actions">
+          <li onClick={() => navigate('/bookmarks')}>
+            <span className="icon"><BookmarkIcon /></span>
+            View Bookmarks
+          </li>
+          <li onClick={() => navigate('/add-house')}>
+            <span className="icon"><AddIcon /></span>
+            Add New House
+          </li>
+          <li onClick={handleLogout}>
+            <span className="icon"><LogoutIcon /></span>
+            Log Out
+          </li>
+        </ul>
       </div>
     </div>
   );
 };
 
-export default PropertyPage;
+export default ProfilePage;

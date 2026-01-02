@@ -12,7 +12,7 @@ const BookmarksPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!session || !session.token) {
+    if (!session || session.user || !session.token) {
       navigate('/login');
       return;
     }
