@@ -1,51 +1,76 @@
-
 import React, { useState, useEffect } from 'react';
-import HouseCard from '../components/HouseCard';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import './BookmarkPage.css';
+import HouseCard from '../components/HouseCard'; // Assuming HouseCard is reusable
+import './BookmarksPage.css';
 
-const BookmarkPage = () => {
-  const [bookmarkedHouses, setBookmarkedHouses] = useState([]);
+const BookmarksPage = () => {
+  const [bookmarks, setBookmarks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const { session } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBookmarkedHouses = async () => {
-      if (session) {
-        try {
-          const response = await fetch('http://localhost:8000/bookmarks/me/', {
-            headers: {
-              'Authorization': `Bearer ${session.access_token}`,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setBookmarkedHouses(data);
-          } else {
-            console.error('Failed to fetch bookmarked houses');
-          }
-        } catch (error) {
-          console.error('Error fetching bookmarked houses:', error);
+    if (!session || !session.token) {
+      navigate('/login');
+      return;
+    }
+
+    const fetchBookmarks = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/v1/bookmarks/me/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch bookmarks. Please try again later.');
         }
+
+        const data = await response.json();
+        console.log("Fetched bookmarks:", data);
+        setBookmarks(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchBookmarkedHouses();
-  }, [session]);
+    fetchBookmarks();
+  }, [session, navigate]);
+
+  const handleRemoveBookmark = (houseId) => {
+    setBookmarks(prev => prev.filter(bookmark => bookmark.house.id !== houseId));
+  };
 
   return (
-    <div className="bookmark-page">
-      <h1>My Bookmarked Houses</h1>
-      <div className="house-list">
-        {bookmarkedHouses.length > 0 ? (
-          bookmarkedHouses.map((house) => (
-            <HouseCard key={house.id} house={house} />
-          ))
-        ) : (
-          <p>You have no bookmarked houses.</p>
-        )}
+    <div className="bookmarks-page-container">
+      <div className="bookmarks-header">
+        <h1>My Bookmarks</h1>
+        <p>Your saved properties for future reference.</p>
       </div>
+
+      {loading && <p className="loading-text">Loading your bookmarks...</p>}
+      {error && <p className="error-message">{error}</p>}
+
+      {!loading && !error && (
+        bookmarks.length > 0 ? (
+          <div className="bookmarks-grid">
+            {bookmarks.map(bookmark => (
+              <HouseCard key={bookmark.house.id} house={bookmark.house} />
+            ))}
+          </div>
+        ) : (
+          <p className="no-bookmarks-text">You haven't bookmarked any properties yet.</p>
+        )
+      )}
     </div>
   );
 };
 
-export default BookmarkPage;
+export default BookmarksPage;
