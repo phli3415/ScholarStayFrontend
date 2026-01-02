@@ -33,10 +33,13 @@ export const AuthProvider = ({ children }) => {
   // This function performs the "handshake" with your backend
   const performBackendHandshake = async (firebaseUser) => {
     try {
+      await firebaseUser.reload();
+      // console.log("Firebase user reloaded:", firebaseUser);
       if (!firebaseUser.emailVerified) {
         setError('Please verify your email before logging in.');
         await signOut(auth);
-        return null;
+        throw new Error("email not verified");
+        // return null;
       }
 
       const token = await firebaseUser.getIdToken();
@@ -135,7 +138,10 @@ export const AuthProvider = ({ children }) => {
     try {
       // Step 1: Just sign in with Firebase.
       await signInWithEmailAndPassword(auth, email, password);
-      
+      //raise error if email not verified is now handled in performBackendHandshake
+      if (!auth.currentUser.emailVerified) {
+        throw new Error('Please verify your email before logging in.');
+      }
       // Step 2: The onAuthStateChanged listener will automatically fire and
       // trigger performBackendHandshake. We removed the manual call here to fix the race condition.
       return { success: true };

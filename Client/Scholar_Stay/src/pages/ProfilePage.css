@@ -1,0 +1,84 @@
+.profile-page-background {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 4rem;
+  min-height: 90vh;
+}
+
+.profile-menu-container {
+  width: 360px;
+  max-width: 90%;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 1rem 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+}
+
+.profile-picture {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #A52A2A;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+.profile-info .username {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #202124;
+  margin: 0;
+}
+
+.profile-info .email {
+  font-size: 0.9rem;
+  color: #5f6368;
+  margin: 2px 0 0 0;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 1rem 0;
+}
+
+.profile-menu-actions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profile-menu-actions li {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  color: #3c4043;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.profile-menu-actions li:hover {
+  background-color: #f1f3f5;
+}
+
+.profile-menu-actions .icon {
+  margin-right: 1.5rem;
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+  color: #5f6368;
+}
