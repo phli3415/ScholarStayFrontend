@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import HouseCard from '../components/HouseCard'; // Assuming HouseCard is reusable
 import './BookmarksPage.css';
 
+const base_url = "http://127.0.0.1:8000/api/v1/";
+
 const BookmarksPage = () => {
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +14,7 @@ const BookmarksPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!session || session.user || !session.token) {
+    if (!session || !session.token) {
       navigate('/login');
       return;
     }
@@ -20,8 +22,7 @@ const BookmarksPage = () => {
     const fetchBookmarks = async () => {
       setLoading(true);
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/v1/bookmarks/me/', {
-          method: 'GET',
+        const response = await fetch(`${base_url}bookmarks/me`, {
           headers: {
             'Authorization': `Bearer ${session.token}`,
           },
@@ -32,7 +33,6 @@ const BookmarksPage = () => {
         }
 
         const data = await response.json();
-        console.log("Fetched bookmarks:", data);
         setBookmarks(data);
       } catch (err) {
         setError(err.message);
@@ -62,7 +62,7 @@ const BookmarksPage = () => {
         bookmarks.length > 0 ? (
           <div className="bookmarks-grid">
             {bookmarks.map(bookmark => (
-              <HouseCard key={bookmark.house.id} house={bookmark.house} />
+              <HouseCard key={bookmark.house.id} house={bookmark.house}/>
             ))}
           </div>
         ) : (
