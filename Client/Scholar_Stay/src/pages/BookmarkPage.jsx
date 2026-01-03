@@ -29,7 +29,7 @@ const BookmarksPage = () => {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch bookmarks. Please try again later.');
+          throw new Error('Failed to fetch bookmarks. Please refresh the webpage.');
         }
 
         const data = await response.json();

@@ -1,10 +1,52 @@
-
-.bookmark-page {
-  padding: 20px;
+/* --- Bookmarks Page Container --- */
+.bookmarks-page-container {
+  width: 100%;
+  max-width: 1400px; /* Limit max width for very large screens */
+  margin: 0 auto; /* Center the container */
+  padding: 2.5rem;
+  box-sizing: border-box; /* Ensures padding is included in the element's total width and height */
 }
 
-.house-list {
+/* --- Header Section --- */
+.bookmarks-header {
+  text-align: center; /* Centered the header text */
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 1rem;
+}
+
+.bookmarks-header h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+}
+
+.bookmarks-header p {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+/* --- Bookmarks Grid (SearchPage style) --- */
+.bookmarks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  /* Creates a responsive grid that fills the space with cards of a minimum 320px width */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.5rem; /* Spacing between cards */
 }
+
+/* --- Status/Feedback Text --- */
+.status-text {
+  font-size: 1.2rem;
+  color: #555;
+  text-align: center;
+  padding: 4rem 0;
+  font-style: italic;
+}
+
+.status-text.error {
+  color: #e74c3c; /* A prominent error color */
+  font-weight: 600;
+}
+
