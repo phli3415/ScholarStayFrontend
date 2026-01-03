@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import HouseCard from '../components/HouseCard'; // Assuming HouseCard is reusable
-import './BookmarksPage.css';
+import './BookmarkPage.css';
 
 const base_url = "http://127.0.0.1:8000/api/v1/";
 
@@ -29,7 +29,7 @@ const BookmarksPage = () => {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch bookmarks. Please try again later.');
+          throw new Error('Failed to fetch bookmarks. Please refresh the webpage.');
         }
 
         const data = await response.json();
