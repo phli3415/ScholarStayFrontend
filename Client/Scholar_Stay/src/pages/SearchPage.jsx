@@ -4,6 +4,7 @@ import '../components/SearchPage.css'; // Corrected import path
 import HouseCard from '../components/HouseCard';
 import SearchBar from '../components/SearchBar';
 import Pagination from '../components/Pagination';
+import { API_BASE_URL } from '../config';
 
 const PAGE_SIZE = 30;
 
@@ -33,8 +34,8 @@ const SearchPage = () => {
         countParams.delete('offset');
         countParams.delete('page');
 
-        const API_URL = `http://127.0.0.1:8000/api/v1/houses/filter/list?${params.toString()}`;
-        const COUNT_API_URL = `http://127.0.0.1:8000/api/v1/houses/filter/count?${countParams.toString()}`;
+        const API_URL = `${API_BASE_URL}/houses/filter/list?${params.toString()}`;
+        const COUNT_API_URL = `${API_BASE_URL}/houses/filter/count?${countParams.toString()}`;
 
         // Fire both requests in parallel
         const [response, countResponse] = await Promise.all([

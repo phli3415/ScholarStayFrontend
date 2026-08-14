@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config';
 import './PropertyPage.css';
 
-const base_url = "http://127.0.0.1:8000/api/v1/";
+const base_url = `${API_BASE_URL}/`;
 
 const getImageUrl = (photo) => {
     if (!photo) return null;

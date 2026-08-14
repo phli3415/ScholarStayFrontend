@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config';
 import './AddHousePage.css';
 
 const AddHousePage = () => {
@@ -81,7 +82,7 @@ const AddHousePage = () => {
     }
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/api/v1/houses/', {
+        const response = await fetch(`${API_BASE_URL}/houses/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${session.token}`,
