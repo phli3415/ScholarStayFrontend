@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import HouseCard from '../components/HouseCard'; // Assuming HouseCard is reusable
 import { API_BASE_URL } from '../config';
-import './BookmarksPage.css';
+import './BookmarkPage.css';
 
 const base_url = `${API_BASE_URL}/`;
 
@@ -30,7 +30,7 @@ const BookmarksPage = () => {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch bookmarks. Please try again later.');
+          throw new Error('Failed to fetch bookmarks. Please refresh the webpage.');
         }
 
         const data = await response.json();
