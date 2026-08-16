@@ -4,7 +4,10 @@ import { API_BASE_URL } from '../config';
 import './ChatPage.css';
 
 const SESSION_STORAGE_KEY = 'scholarstay_chat_session_id';
-const REQUEST_TIMEOUT_MS = 30000;
+// The agentic workflow can chain several LLM calls (intent parsing, search,
+// recommendation) before replying, so this is generously long — it's a safety
+// net against a truly hung request, not a realistic expected latency.
+const REQUEST_TIMEOUT_MS = 180000;
 
 const EXAMPLE_PROMPTS = [
   'Find me a house under $1000 near campus',
@@ -48,10 +51,12 @@ const ChatPage = () => {
     listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isThinking, error]);
 
-  const sendQuery = useCallback(async (query) => {
+  const sendQuery = useCallback(async (query, { appendUserMessage = true } = {}) => {
     setError(null);
     setIsThinking(true);
-    setMessages((prev) => [...prev, { id: nextMessageId(), role: 'user', content: query }]);
+    if (appendUserMessage) {
+      setMessages((prev) => [...prev, { id: nextMessageId(), role: 'user', content: query }]);
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -119,7 +124,7 @@ const ChatPage = () => {
 
   const handleRetry = () => {
     if (lastFailedQuery && !isThinking) {
-      sendQuery(lastFailedQuery);
+      sendQuery(lastFailedQuery, { appendUserMessage: false });
     }
   };
 
