@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import HouseCard from '../components/HouseCard'; // Assuming HouseCard is reusable
 import { API_BASE_URL } from '../config';
@@ -12,11 +12,10 @@ const BookmarksPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { session } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!session || !session.token) {
-      navigate('/login');
+      setLoading(false);
       return;
     }
 
@@ -43,11 +42,22 @@ const BookmarksPage = () => {
     };
 
     fetchBookmarks();
-  }, [session, navigate]);
+  }, [session]);
 
   const handleRemoveBookmark = (houseId) => {
     setBookmarks(prev => prev.filter(bookmark => bookmark.house.id !== houseId));
   };
+
+  if (!session || !session.token) {
+    return (
+      <div className="bookmarks-page-container">
+        <div className="locked-container">
+          <p className="locked-message">This feature requires you to be logged in.</p>
+          <Link to="/login" className="locked-login-link">Go to Login</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bookmarks-page-container">

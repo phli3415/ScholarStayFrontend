@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './ProfilePage.css'; // Make sure the new CSS is imported
 
 // Simple icons - you can replace these with an icon library like react-icons
@@ -12,15 +12,6 @@ const ProfilePage = () => {
   const { session, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to login page if user is not authenticated
-  useEffect(() => {
-    // We add a check for loading state from the context if it exists
-    // For now, we rely on session being populated.
-    if (!session || !session.user) {
-      navigate('/login');
-    }
-  }, [session, navigate]);
-
   const handleLogout = async () => {
     const { success } = await logout();
     if (success) {
@@ -29,10 +20,15 @@ const ProfilePage = () => {
     // If logout fails, an error will be set in the context, which you can display if needed
   };
 
-  // While session is loading or if user is not logged in, render nothing.
-  // The useEffect will handle the redirect.
   if (!session || !session.user || !session.firebaseUser) {
-    return null;
+    return (
+      <div className="profile-page-background">
+        <div className="profile-menu-container locked-container">
+          <p className="locked-message">This feature requires you to be logged in.</p>
+          <Link to="/login" className="locked-login-link">Go to Login</Link>
+        </div>
+      </div>
+    );
   }
 
   const userInitial = session.user.username ? session.user.username.charAt(0).toUpperCase() : '?';

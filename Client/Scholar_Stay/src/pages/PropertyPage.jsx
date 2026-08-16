@@ -81,10 +81,7 @@ const PropertyPage = () => {
   }, [session, house]);
 
   const handleBookmark = async () => {
-    if (!session) {
-      navigate('/login');
-      return;
-    }
+    if (!session) return;
 
     try {
       const response = await fetch(`${base_url}bookmarks/`, {
@@ -155,7 +152,13 @@ const PropertyPage = () => {
               <button onClick={handleBookmark} className="bookmark-button">Add Bookmark</button>
             )
           ) : (
-            <button onClick={() => navigate('/login')} className="bookmark-button">Login to Add Bookmark</button>
+            <button
+              disabled
+              className="bookmark-button"
+              title="This feature requires you to be logged in."
+            >
+              Login to Add Bookmark
+            </button>
           )}
         </div>
 

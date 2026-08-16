@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config';
 import './AddHousePage.css';
@@ -25,12 +25,6 @@ const AddHousePage = () => {
 
   const { session } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!session || !session.user) {
-      navigate('/login');
-    }
-  }, [session, navigate]);
 
   useEffect(() => {
     const validateForm = () => {
@@ -106,6 +100,17 @@ const AddHousePage = () => {
         setIsSubmitting(false);
     }
   };
+
+  if (!session || !session.user) {
+    return (
+      <div className="add-house-container">
+        <div className="add-house-card locked-container">
+          <p className="locked-message">This feature requires you to be logged in.</p>
+          <Link to="/login" className="locked-login-link">Go to Login</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="add-house-container">

@@ -19,6 +19,29 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
+.locked-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.locked-message {
+  color: #5f6368;
+  margin: 0;
+}
+
+.locked-login-link {
+  color: #A52A2A;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.locked-login-link:hover {
+  text-decoration: underline;
+}
+
 .add-house-card h2 {
   text-align: center;
   margin-bottom: 0.5rem;
