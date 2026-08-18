@@ -6,9 +6,11 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   
-  /* 1. Set fixed dimensions for uniform card size */
-  width: 360px;
-  height: 530px; /* Increased height to ensure content fits */
+  /* 1. Fill the grid cell instead of a fixed size, so cards never overflow
+     their column on narrow screens (grid's default align-items: stretch
+     still equalizes card heights within a row). */
+  width: 100%;
+  height: 100%;
 
   /* 2. Use flexbox to structure the card vertically */
   display: flex;

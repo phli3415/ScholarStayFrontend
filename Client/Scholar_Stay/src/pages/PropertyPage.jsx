@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config';
+import noImageAvailable from '../assets/pictures/noImageAvaliable.png';
 import './PropertyPage.css';
 
 const base_url = `${API_BASE_URL}/`;
 
 const getImageUrl = (photo) => {
-    if (!photo) return null;
+    if (!photo) return noImageAvailable;
     if (typeof photo === 'string') {
         if (photo.startsWith('data:')) return photo;
         return `data:image/jpeg;base64,${photo}`;
@@ -19,10 +20,10 @@ const getImageUrl = (photo) => {
             return `data:image/jpeg;base64,${base64String}`;
         } catch (error) {
             console.error('Error converting byte array to image:', error);
-            return null;
+            return noImageAvailable;
         }
     }
-    return null;
+    return noImageAvailable;
 };
 
 const PropertyPage = () => {

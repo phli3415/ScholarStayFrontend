@@ -1,29 +1,30 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Import Link for client-side routing
+import noImageAvailable from '../assets/pictures/noImageAvaliable.png';
 import './HouseCard.css';
 
 // Function to handle image data conversion
 const getImageUrl = (photo) => {
-    if (!photo) return null;
-    
+    if (!photo) return noImageAvailable;
+
     if (typeof photo === 'string') {
         if (photo.startsWith('data:')) {
             return photo;
         }
         return `data:image/jpeg;base64,${photo}`;
     }
-    
+
     if (Array.isArray(photo) && photo.length > 0) {
         try {
             const base64String = btoa(String.fromCharCode(...photo));
             return `data:image/jpeg;base64,${base64String}`;
         } catch (error) {
             console.error('Error converting byte array to image:', error);
-            return null;
+            return noImageAvailable;
         }
     }
-    
-    return null;
+
+    return noImageAvailable;
 };
 
 

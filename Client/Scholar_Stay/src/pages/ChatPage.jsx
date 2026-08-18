@@ -42,6 +42,7 @@ const ChatPage = () => {
   const [lastFailedQuery, setLastFailedQuery] = useState(null);
   const sessionIdRef = useRef(null);
   const listEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
   if (sessionIdRef.current === null) {
     sessionIdRef.current = getSessionId();
@@ -50,6 +51,15 @@ const ChatPage = () => {
   useEffect(() => {
     listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isThinking, error]);
+
+  // Auto-grow the input with its content, up to the CSS max-height cap (past
+  // that, the textarea's own overflow-y: auto takes over with a scrollbar).
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [input]);
 
   const sendQuery = useCallback(async (query, { appendUserMessage = true } = {}) => {
     setError(null);
@@ -122,6 +132,14 @@ const ChatPage = () => {
     sendQuery(query);
   };
 
+  const handleInputKeyDown = (e) => {
+    // Enter sends the message; Shift+Enter inserts a newline like most chat apps.
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   const handleRetry = () => {
     if (lastFailedQuery && !isThinking) {
       sendQuery(lastFailedQuery, { appendUserMessage: false });
@@ -148,13 +166,18 @@ const ChatPage = () => {
           {messages.map((msg) => (
             <div key={msg.id} className={`chat-message chat-message-${msg.role}`}>
               <div className="chat-bubble">
-                <p>{msg.content}</p>
-                {msg.recommendation && msg.recommendation.length > 0 && (
+                {msg.recommendation && msg.recommendation.length > 0 ? (
+                  // The backend's `reply` text is the same content as
+                  // `recommendation`, just concatenated into one paragraph
+                  // instead of split per-listing — showing both duplicates it,
+                  // so prefer the more scannable bullet-point form.
                   <ul className="chat-recommendation-list">
                     {msg.recommendation.map((item, i) => (
                       <li key={i}>{item}</li>
                     ))}
                   </ul>
+                ) : (
+                  <p>{msg.content}</p>
                 )}
               </div>
               {msg.houses && msg.houses.length > 0 && (
@@ -205,12 +228,14 @@ const ChatPage = () => {
         )}
 
         <form className="chat-input-row" onSubmit={handleSubmit}>
-          <input
-            type="text"
+          <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleInputKeyDown}
             placeholder="Ask about student housing..."
             disabled={isThinking}
+            rows={1}
           />
           <button type="submit" disabled={isThinking || !input.trim()}>
             Send
