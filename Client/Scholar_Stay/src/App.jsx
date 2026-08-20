@@ -25,7 +25,14 @@ function App() {
   useEffect(() => {
     if (hasWokenBackend.current) return;
     hasWokenBackend.current = true;
-    fetch(`${API_BASE_URL}/houses/filter/count`).catch(() => {});
+    console.log('[wake-up] pinging backend to warm up the database…');
+    fetch(`${API_BASE_URL}/houses/filter/count`)
+      .then((res) => {
+        console.log(`[wake-up] backend responded (status ${res.status}) — database should be warm now`);
+      })
+      .catch((err) => {
+        console.log('[wake-up] ping failed (backend may be unreachable):', err.message);
+      });
   }, []);
 
   return (
