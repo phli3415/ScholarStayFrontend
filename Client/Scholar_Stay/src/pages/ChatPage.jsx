@@ -3,7 +3,12 @@ import HouseCard from '../components/HouseCard';
 import { API_BASE_URL } from '../config';
 import './ChatPage.css';
 
+// Both keyed in localStorage (not sessionStorage) so the id and the visible
+// transcript survive refreshes, new tabs, and browser restarts together —
+// otherwise one persisting without the other re-creates the same "AI
+// remembers something the screen never showed" mismatch.
 const SESSION_STORAGE_KEY = 'scholarstay_chat_session_id';
+const MESSAGES_STORAGE_KEY = 'scholarstay_chat_messages';
 // The agentic workflow can chain several LLM calls (intent parsing, search,
 // recommendation) before replying, so this is generously long — it's a safety
 // net against a truly hung request, not a realistic expected latency.
@@ -16,11 +21,17 @@ const EXAMPLE_PROMPTS = [
 ];
 
 const getSessionId = () => {
-  let id = sessionStorage.getItem(SESSION_STORAGE_KEY);
+  let id = localStorage.getItem(SESSION_STORAGE_KEY);
   if (!id) {
     id = crypto.randomUUID();
-    sessionStorage.setItem(SESSION_STORAGE_KEY, id);
+    localStorage.setItem(SESSION_STORAGE_KEY, id);
   }
+  return id;
+};
+
+const startNewSessionId = () => {
+  const id = crypto.randomUUID();
+  localStorage.setItem(SESSION_STORAGE_KEY, id);
   return id;
 };
 
@@ -34,8 +45,19 @@ const GREETING = {
     "Hi! I'm the ScholarStay AI assistant. Ask me about student housing near your campus — budget, amenities, distance, anything — and I'll search live listings for you.",
 };
 
+const loadStoredMessages = () => {
+  try {
+    const raw = localStorage.getItem(MESSAGES_STORAGE_KEY);
+    if (!raw) return [GREETING];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : [GREETING];
+  } catch {
+    return [GREETING];
+  }
+};
+
 const ChatPage = () => {
-  const [messages, setMessages] = useState([GREETING]);
+  const [messages, setMessages] = useState(loadStoredMessages);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [error, setError] = useState(null);
@@ -51,6 +73,13 @@ const ChatPage = () => {
   useEffect(() => {
     listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isThinking, error]);
+
+  // Keep the visible transcript in sync with localStorage so a refresh
+  // re-renders what was actually said, matching what the backend remembers
+  // for this session_id.
+  useEffect(() => {
+    localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
 
   // Auto-grow the input with its content, up to the CSS max-height cap (past
   // that, the textarea's own overflow-y: auto takes over with a scrollbar).
@@ -151,9 +180,26 @@ const ChatPage = () => {
     sendQuery(prompt);
   };
 
+  const handleNewChat = () => {
+    if (isThinking) return;
+    sessionIdRef.current = startNewSessionId();
+    setMessages([GREETING]);
+    setError(null);
+    setLastFailedQuery(null);
+  };
+
   return (
     <div className="chat-page">
       <div className="chat-header">
+        <button
+          type="button"
+          className="chat-new-button"
+          onClick={handleNewChat}
+          disabled={isThinking}
+          title="Start a new conversation — the assistant won't remember this one"
+        >
+          New Chat
+        </button>
         <h1>AI Housing Assistant</h1>
         <p>
           Ask about listings, budget, amenities, or distance to campus — the agent
