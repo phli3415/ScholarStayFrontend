@@ -163,7 +163,9 @@ const PropertyPage = () => {
           )}
         </div>
 
-        <h1 className="property-title">{house.street}, {house.city}</h1>
+        <h1 className="property-title">
+          {[house.street, house.city].filter(Boolean).join(', ')}
+        </h1>
 
         <div className="property-image">
           <img src={imageUrl} alt={`View of ${house.street}`} />

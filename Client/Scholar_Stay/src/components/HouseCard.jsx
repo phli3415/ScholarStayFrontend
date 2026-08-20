@@ -29,8 +29,10 @@ const getImageUrl = (photo) => {
 
 
 const HouseCard = ({ house }) => {
-  // Combine address parts into a single string
-  const fullAddress = `${house.street}, ${house.city}`;
+  // Combine address parts into a single string, skipping any that are
+  // missing (null/undefined/empty) instead of printing the literal "null".
+  const fullAddress = [house.street, house.city].filter(Boolean).join(', ');
+  const displayAddress = [fullAddress, house.province].filter(Boolean).join(', ');
 
   // Determine the display text for the button
   const statusText = house.is_rented ? 'Rented' : 'Available';
@@ -48,7 +50,7 @@ const HouseCard = ({ house }) => {
         </div>
       </div>
       <div className="house-card-content">
-        <h3 className="house-address">{fullAddress}, {house.province}</h3>
+        <h3 className="house-address">{displayAddress}</h3>
         
         <p className="house-rent">
           ${house.monthly_rent} <span className="rent-period">/ month</span>
