@@ -1,7 +1,9 @@
 
+import { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext'; // Import the AuthProvider
 import Navbar from './components/Navbar';
+import DisclaimerModal from './components/DisclaimerModal';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import PropertyPage from './pages/PropertyPage';
@@ -11,11 +13,24 @@ import ProfilePage from './pages/ProfilePage';
 import ChatPage from './pages/ChatPage';
 import AddHousePage from './pages/AddHousePage';
 import BookmarkPage from './pages/BookmarkPage';
+import { API_BASE_URL } from './config';
 import './App.css';
 
 function App() {
+  // Fire-and-forget: nudges the (often cold, serverless) database awake as
+  // soon as the site loads, before the user navigates to a data-heavy page.
+  // Guarded with a ref because StrictMode double-invokes effects in dev —
+  // without it this would fire twice locally (harmless, but wasteful).
+  const hasWokenBackend = useRef(false);
+  useEffect(() => {
+    if (hasWokenBackend.current) return;
+    hasWokenBackend.current = true;
+    fetch(`${API_BASE_URL}/houses/filter/count`).catch(() => {});
+  }, []);
+
   return (
     <AuthProvider> {/* Wrap the entire app with AuthProvider */}
+      <DisclaimerModal />
       <Router>
         <Navbar />
         <Routes>
